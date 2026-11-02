@@ -2,7 +2,7 @@
 Usage: python3 build.py"""
 import json, pathlib
 root = pathlib.Path(__file__).parent
-ids = ['snapshot', 'levels', 'scenarios', 'analysts', 'quarterly', 'factors', 'news']
+ids = sorted(p.stem for p in (root / 'data').glob('*.json'))
 data = {i: json.loads((root / 'data' / f'{i}.json').read_text()) for i in ids}
 page = (root / 'page.html').read_text().replace('<meta name="dash-one-writer">', '')
 tpl = (root / 'template.html').read_text()

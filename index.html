@@ -19,7 +19,7 @@ body{margin:0;background:var(--color-bg);color:var(--color-fg)}
 
 <script>
 (() => {
-  const DATA = {"snapshot": [{"metric": "close", "label": "收盤價 10/30", "value": 69.05}, {"metric": "chg", "label": "單日漲跌", "value": -0.128}, {"metric": "day_low", "label": "日低", "value": 65.77}, {"metric": "day_high", "label": "日高", "value": 74.25}, {"metric": "prev_close", "label": "前收", "value": 79.19}, {"metric": "high52", "label": "52週高 (5/13)", "value": 233.67}, {"metric": "low52", "label": "52週低", "value": 18.5}, {"metric": "mcap", "label": "市值", "value": 5863000000.0}, {"metric": "shares", "label": "流通股數", "value": 84910000.0}, {"metric": "short_shares", "label": "空單股數 (9/30)", "value": 13870000.0}, {"metric": "dtc", "label": "空單回補天數", "value": 2.0}, {"metric": "implied_move", "label": "財報週隱含波動", "value": 0.2005}, {"metric": "beta", "label": "Beta", "value": 3.85}, {"metric": "atm_price", "label": "第三輪 ATM 均價", "value": 105.36}, {"metric": "atm_shares", "label": "第三輪 ATM 新股", "value": 5690000.0}], "levels": [{"price": 120.03, "side": "壓力", "strength": 2, "reason": "10/7 高管依計畫賣股均價"}, {"price": 105.36, "side": "壓力", "strength": 5, "reason": "第三輪 $600M ATM 增發均價，約 569 萬股新股套牢"}, {"price": 101.0, "side": "壓力", "strength": 3, "reason": "9/24 收盤，跌勢起點，$100 整數關卡"}, {"price": 92.0, "side": "壓力", "strength": 2, "reason": "B. Riley 目標價（中立）"}, {"price": 82.89, "side": "壓力", "strength": 3, "reason": "財報週期權隱含上緣 (+20%)"}, {"price": 79.19, "side": "壓力", "strength": 4, "reason": "10/29 收盤，10/30 跳空缺口上緣"}, {"price": 74.25, "side": "壓力", "strength": 3, "reason": "10/30 日高"}, {"price": 67.51, "side": "支撐", "strength": 3, "reason": "10/23 收盤低點"}, {"price": 65.77, "side": "支撐", "strength": 4, "reason": "10/30 日低，近期最低點"}, {"price": 55.21, "side": "支撐", "strength": 3, "reason": "財報週期權隱含下緣 (−20%)"}, {"price": 50.0, "side": "支撐", "strength": 2, "reason": "整數心理關卡"}, {"price": 34.86, "side": "支撐", "strength": 2, "reason": "2026 年初價位，年度漲幅歸零點"}], "scenarios": [{"scenario": "多頭", "prob": 0.3, "low": 83, "high": 92, "trigger": "營收≥$280M、Q4 指引≥$330M、1.6T 出貨確認、無新增 ATM"}, {"scenario": "中性", "prob": 0.45, "low": 60, "high": 80, "trigger": "營收落在 $255–290M 指引內、Q4 指引符合預期、仍有稀釋疑慮"}, {"scenario": "空頭", "prob": 0.25, "low": 50, "high": 58, "trigger": "營收或毛利率低於指引、DSP/TIA 缺料延遲、宣布第四輪增發"}], "analysts": [{"firm": "Rosenblatt", "rating": "買進", "target": 220, "date": "2026-08-07"}, {"firm": "Needham", "rating": "買進", "target": 170, "date": "2026-10-27"}, {"firm": "Raymond James", "rating": "優於大盤", "target": 160, "date": "2026"}, {"firm": "B. Riley", "rating": "中立", "target": 92, "date": "2026-10-15"}], "quarterly": [{"quarter": "Q3'25", "revenue": 118.63, "estimate": 119.77, "eps": -0.09}, {"quarter": "Q4'25", "revenue": 134.27, "estimate": 132.28, "eps": -0.01}, {"quarter": "Q1'26", "revenue": 151.14, "estimate": 156.98, "eps": -0.07}, {"quarter": "Q2'26", "revenue": 191.92, "estimate": 190.48, "eps": 0.06}, {"quarter": "Q3'26E", "revenue": null, "estimate": 268.11, "eps": null}], "factors": [{"factor": "營收成長", "score": 2, "note": "Q2 營收年增 86%，連五季創新高；800G Q3 預估季增近 5 倍"}, {"factor": "訂單能見度", "score": 2, "note": "1.6T $200M 訂單 Q4 放量；管理層稱需求超過產能至 2027 年中"}, {"factor": "分析師目標價", "score": 1, "note": "共識約 $160+，遠高於現價，但 Needham、B. Riley 下修中"}, {"factor": "空單燃料", "score": 1, "note": "空單約 1,387 萬股，回補 2 天；好消息時易軋空"}, {"factor": "股權稀釋", "score": -2, "note": "2026 年三輪 ATM 合計約 $1.6B，$105 套牢新股形成賣壓"}, {"factor": "產業資金面", "score": -2, "note": "Google 自由現金流轉負引發 AI 資本支出疑慮，光通訊股集體重挫"}, {"factor": "技術趨勢", "score": -2, "note": "10/15 50 日均線跌破 200 日均線（死亡交叉），距高點跌約 70%"}, {"factor": "內部人動向", "score": -1, "note": "CFO 與高管依計畫持續賣股"}, {"factor": "財務體質", "score": -1, "note": "GAAP 仍虧損、毛利率約 30%，缺料加急費壓抑毛利"}], "news": [{"date": "2026-10-30", "tone": "空", "headline": "Google 自由現金流遠差於預期，Amazon、Intel 加深 AI 支出疑慮，AAOI 收跌 12.8%"}, {"date": "2026-10-29", "tone": "中", "headline": "傳 Marvell 洽購 Lumentum，光通訊族群分歧，AAOI 小跌約 3%"}, {"date": "2026-10-27", "tone": "空", "headline": "Needham 目標價由 $190 下修至 $170，維持買進"}, {"date": "2026-10-22", "tone": "空", "headline": "晶片股帶頭拋售，光通訊三雄財報前同步重挫"}, {"date": "2026-10-15", "tone": "空", "headline": "B. Riley 目標價由 $109 下修至 $92，維持中立"}, {"date": "2026-10-05", "tone": "中", "headline": "完成第三輪 $600M ATM，約 569 萬股、均價 $105.36"}, {"date": "2026-10-02", "tone": "多", "headline": "Lumentum 稱元件已售罄至 2029 年初，產業需求強"}, {"date": "2026-08-24", "tone": "空", "headline": "宣布第三輪 $600M ATM，單日重挫近 14%"}, {"date": "2026-08-06", "tone": "多", "headline": "Q2 營收 $191.9M 創新高、轉為非 GAAP 獲利；Q3 指引 $255–290M"}]};
+  const DATA = {"analysts": [{"firm": "Rosenblatt", "rating": "買進", "target": 220, "date": "2026-08-07"}, {"firm": "Needham", "rating": "買進", "target": 170, "date": "2026-10-27"}, {"firm": "Raymond James", "rating": "優於大盤", "target": 160, "date": "2026"}, {"firm": "B. Riley", "rating": "中立", "target": 92, "date": "2026-10-15"}], "earnings_moves": [{"date": "2025-11-06", "quarter": "Q3'25", "pre_close": 29.1, "implied": null, "move": -0.044, "note": "營收略低於預期、Q4 指引下修；盤前一度 −15%"}, {"date": "2026-02-26", "quarter": "Q4'25", "pre_close": 53.69, "implied": null, "move": 0.44, "note": "大幅優於預期、喊出 2026 營收破 $10 億；盤中漲幅（收盤未公布）"}, {"date": "2026-05-07", "quarter": "Q1'26", "pre_close": 157.5, "implied": null, "move": -0.0682, "note": "EPS 與 Q2 指引不如預期"}, {"date": "2026-08-06", "quarter": "Q2'26", "pre_close": 124.22, "implied": 0.254, "move": 0.0918, "note": "營收創新高、轉為非 GAAP 獲利；盤中最高 +20.2%"}], "factors": [{"factor": "營收成長", "score": 2, "note": "Q2 營收年增 86%，連五季創新高；800G Q3 預估季增近 5 倍"}, {"factor": "訂單能見度", "score": 2, "note": "1.6T $200M 訂單 Q4 放量；管理層稱需求超過產能至 2027 年中"}, {"factor": "分析師目標價", "score": 1, "note": "共識約 $160+，遠高於現價，但 Needham、B. Riley 下修中"}, {"factor": "空單燃料", "score": 1, "note": "空單約 1,387 萬股，回補 2 天；好消息時易軋空"}, {"factor": "股權稀釋", "score": -2, "note": "2026 年三輪 ATM 合計約 $1.6B，$105 套牢新股形成賣壓"}, {"factor": "產業資金面", "score": -2, "note": "Google 自由現金流轉負引發 AI 資本支出疑慮，光通訊股集體重挫"}, {"factor": "技術趨勢", "score": -2, "note": "10/15 50 日均線跌破 200 日均線（死亡交叉），距高點跌約 70%"}, {"factor": "內部人動向", "score": -1, "note": "CFO 與高管依計畫持續賣股"}, {"factor": "財務體質", "score": -1, "note": "GAAP 仍虧損、毛利率約 30%，缺料加急費壓抑毛利"}], "levels": [{"price": 120.03, "side": "壓力", "strength": 2, "reason": "10/7 高管依計畫賣股均價"}, {"price": 105.36, "side": "壓力", "strength": 5, "reason": "第三輪 $600M ATM 增發均價，約 569 萬股新股套牢"}, {"price": 101.0, "side": "壓力", "strength": 3, "reason": "9/24 收盤，跌勢起點，$100 整數關卡"}, {"price": 92.0, "side": "壓力", "strength": 2, "reason": "B. Riley 目標價（中立）"}, {"price": 81.9, "side": "壓力", "strength": 3, "reason": "財報週期權隱含上緣 (+18.6%)"}, {"price": 79.19, "side": "壓力", "strength": 4, "reason": "10/29 收盤，10/30 跳空缺口上緣"}, {"price": 74.25, "side": "壓力", "strength": 3, "reason": "10/30 日高"}, {"price": 67.51, "side": "支撐", "strength": 3, "reason": "10/23 收盤低點"}, {"price": 65.77, "side": "支撐", "strength": 4, "reason": "10/30 日低，近期最低點"}, {"price": 56.2, "side": "支撐", "strength": 3, "reason": "財報週期權隱含下緣 (−18.6%)"}, {"price": 50.0, "side": "支撐", "strength": 2, "reason": "整數心理關卡"}, {"price": 34.86, "side": "支撐", "strength": 2, "reason": "2026 年初價位，年度漲幅歸零點"}], "news": [{"date": "2026-10-30", "tone": "空", "headline": "Google 自由現金流遠差於預期，Amazon、Intel 加深 AI 支出疑慮，AAOI 收跌 12.8%"}, {"date": "2026-10-29", "tone": "中", "headline": "傳 Marvell 洽購 Lumentum，光通訊族群分歧，AAOI 小跌約 3%"}, {"date": "2026-10-27", "tone": "空", "headline": "Needham 目標價由 $190 下修至 $170，維持買進"}, {"date": "2026-10-22", "tone": "空", "headline": "晶片股帶頭拋售，光通訊三雄財報前同步重挫"}, {"date": "2026-10-15", "tone": "空", "headline": "B. Riley 目標價由 $109 下修至 $92，維持中立"}, {"date": "2026-10-05", "tone": "中", "headline": "完成第三輪 $600M ATM，約 569 萬股、均價 $105.36"}, {"date": "2026-10-02", "tone": "多", "headline": "Lumentum 稱元件已售罄至 2029 年初，產業需求強"}, {"date": "2026-08-24", "tone": "空", "headline": "宣布第三輪 $600M ATM，單日重挫近 14%"}, {"date": "2026-08-06", "tone": "多", "headline": "Q2 營收 $191.9M 創新高、轉為非 GAAP 獲利；Q3 指引 $255–290M"}], "peers": [{"ticker": "AAOI", "name": "Applied Opto", "close": 69.05, "chg": -0.128}, {"ticker": "COHR", "name": "Coherent", "close": 210.32, "chg": -0.1134}, {"ticker": "MRVL", "name": "Marvell", "close": 196.4, "chg": -0.1005}, {"ticker": "LITE", "name": "Lumentum", "close": 840.7, "chg": -0.0857}], "predictions": [{"date": "2026-11-02", "base_close": 69.05, "band_low": 56.2, "band_high": 81.9, "ev": 71.25, "bull_share": 0.4286, "horizon": "5 個交易日", "check_date": "2026-11-09", "actual": null, "result": "待驗證", "bias": "偏空"}], "prices": [{"date": "2026-08-17", "open": 152.64, "high": 160.99, "low": 147.35, "close": 154.89, "volume": 12904145}, {"date": "2026-08-18", "open": 146.2, "high": 151.41, "low": 131.22, "close": 131.41, "volume": 14651488}, {"date": "2026-08-19", "open": 135.85, "high": 138.56, "low": 121.5, "close": 122.19, "volume": 12346620}, {"date": "2026-08-20", "open": 121.92, "high": 130.49, "low": 118.6, "close": 129.1, "volume": 9518766}, {"date": "2026-08-21", "open": 129.37, "high": 133.72, "low": 121.89, "close": 124.82, "volume": 9748192}, {"date": "2026-08-24", "open": 109.13, "high": 112.46, "low": 102.1, "close": 107.63, "volume": 15016539}, {"date": "2026-08-25", "open": 111.78, "high": 115.08, "low": 110.24, "close": 113.15, "volume": 6735547}, {"date": "2026-08-26", "open": 110.59, "high": 114.21, "low": 110.01, "close": 113.76, "volume": 4878840}, {"date": "2026-08-27", "open": 117.03, "high": 118.9, "low": 111.3, "close": 113.28, "volume": 6254054}, {"date": "2026-08-28", "open": 110.46, "high": 110.9, "low": 105.15, "close": 106.23, "volume": 5716918}, {"date": "2026-08-31", "open": 107.52, "high": 108.67, "low": 104.06, "close": 107.69, "volume": 4609494}, {"date": "2026-09-01", "open": 104.45, "high": 105.74, "low": 101.23, "close": 103.39, "volume": 4893769}, {"date": "2026-09-02", "open": 102.09, "high": 104.74, "low": 100.8, "close": 103.13, "volume": 4092318}, {"date": "2026-09-03", "open": 101.9, "high": 103.14, "low": 96.96, "close": 100.38, "volume": 5917986}, {"date": "2026-09-04", "open": 101.91, "high": 106.56, "low": 100.54, "close": 105.53, "volume": 6840210}, {"date": "2026-09-08", "open": 108.39, "high": 116.9, "low": 107.8, "close": 111.55, "volume": 12081149}, {"date": "2026-09-09", "open": 110.78, "high": 113.64, "low": 107.62, "close": 107.93, "volume": 5977405}, {"date": "2026-09-10", "open": 104.5, "high": 109.78, "low": 102.99, "close": 103.29, "volume": 5703942}, {"date": "2026-09-11", "open": 104.51, "high": 108.67, "low": 104.08, "close": 105.36, "volume": 5001360}, {"date": "2026-09-14", "open": 96.77, "high": 101.13, "low": 95.67, "close": 95.76, "volume": 8519369}, {"date": "2026-09-15", "open": 96.99, "high": 99.79, "low": 95.08, "close": 95.29, "volume": 4598478}, {"date": "2026-09-16", "open": 98.2, "high": 99.6, "low": 94.0, "close": 96.74, "volume": 7101162}, {"date": "2026-09-17", "open": 100.73, "high": 102.35, "low": 96.36, "close": 98.06, "volume": 7819196}, {"date": "2026-09-18", "open": 101.07, "high": 105.44, "low": 98.52, "close": 105.17, "volume": 9920293}, {"date": "2026-09-21", "open": 108.2, "high": 109.73, "low": 104.92, "close": 108.67, "volume": 8161283}, {"date": "2026-09-22", "open": 106.93, "high": 110.74, "low": 103.9, "close": 107.0, "volume": 7480508}, {"date": "2026-09-23", "open": 106.6, "high": 107.32, "low": 100.42, "close": 101.06, "volume": 6601676}, {"date": "2026-09-24", "open": 98.93, "high": 103.58, "low": 97.59, "close": 101.03, "volume": 5551425}, {"date": "2026-09-25", "open": 101.71, "high": 105.03, "low": 99.97, "close": 101.4, "volume": 5510957}, {"date": "2026-09-28", "open": 100.09, "high": 102.43, "low": 93.62, "close": 96.82, "volume": 8195644}, {"date": "2026-09-29", "open": 98.77, "high": 103.83, "low": 97.43, "close": 100.67, "volume": 7288123}, {"date": "2026-09-30", "open": 101.9, "high": 104.25, "low": 96.41, "close": 99.26, "volume": 5827340}, {"date": "2026-10-01", "open": 99.67, "high": 108.28, "low": 97.77, "close": 107.32, "volume": 11307717}, {"date": "2026-10-02", "open": 110.25, "high": 117.7, "low": 106.32, "close": 115.59, "volume": 11066147}, {"date": "2026-10-05", "open": 118.5, "high": 121.92, "low": 112.8, "close": 121.57, "volume": 9354092}, {"date": "2026-10-06", "open": 126.0, "high": 131.15, "low": 124.3, "close": 130.16, "volume": 12525183}, {"date": "2026-10-07", "open": 126.12, "high": 127.89, "low": 119.73, "close": 122.54, "volume": 10765723}, {"date": "2026-10-08", "open": 117.44, "high": 119.91, "low": 104.88, "close": 105.9, "volume": 19419305}, {"date": "2026-10-09", "open": 113.0, "high": 117.16, "low": 108.62, "close": 109.64, "volume": 14512493}, {"date": "2026-10-12", "open": 106.2, "high": 106.41, "low": 99.22, "close": 100.68, "volume": 11030865}, {"date": "2026-10-13", "open": 97.44, "high": 99.77, "low": 95.08, "close": 97.78, "volume": 10830634}, {"date": "2026-10-14", "open": 94.96, "high": 96.14, "low": 85.76, "close": 86.22, "volume": 14925813}, {"date": "2026-10-15", "open": 80.91, "high": 85.02, "low": 76.21, "close": 83.73, "volume": 17787678}, {"date": "2026-10-16", "open": 83.31, "high": 83.44, "low": 75.43, "close": 75.57, "volume": 14151994}, {"date": "2026-10-19", "open": 80.0, "high": 80.47, "low": 75.62, "close": 78.2, "volume": 11698250}, {"date": "2026-10-20", "open": 75.0, "high": 79.2, "low": 73.05, "close": 76.74, "volume": 9118018}, {"date": "2026-10-21", "open": 80.92, "high": 81.32, "low": 76.51, "close": 77.32, "volume": 7886213}, {"date": "2026-10-22", "open": 72.19, "high": 73.15, "low": 66.28, "close": 68.07, "volume": 14145528}, {"date": "2026-10-23", "open": 68.72, "high": 71.2, "low": 67.12, "close": 67.51, "volume": 8970981}, {"date": "2026-10-26", "open": 67.48, "high": 74.39, "low": 66.51, "close": 71.94, "volume": 11301903}, {"date": "2026-10-27", "open": null, "high": null, "low": null, "close": 76.95, "volume": null}, {"date": "2026-10-28", "open": null, "high": 82.28, "low": 77.02, "close": 82.22, "volume": null}, {"date": "2026-10-29", "open": null, "high": null, "low": null, "close": 79.19, "volume": null}, {"date": "2026-10-30", "open": 71.86, "high": 74.25, "low": 65.77, "close": 69.05, "volume": 16486140}], "quarterly": [{"quarter": "Q3'25", "revenue": 118.63, "estimate": 119.77, "eps": -0.09}, {"quarter": "Q4'25", "revenue": 134.27, "estimate": 132.28, "eps": -0.01}, {"quarter": "Q1'26", "revenue": 151.14, "estimate": 156.98, "eps": -0.07}, {"quarter": "Q2'26", "revenue": 191.92, "estimate": 190.48, "eps": 0.06}, {"quarter": "Q3'26E", "revenue": null, "estimate": 268.11, "eps": null}], "scenarios": [{"scenario": "多頭", "prob": 0.3, "low": 83, "high": 92, "trigger": "營收≥$280M、Q4 指引≥$330M、1.6T 出貨確認、無新增 ATM"}, {"scenario": "中性", "prob": 0.45, "low": 60, "high": 80, "trigger": "營收落在 $255–290M 指引內、Q4 指引符合預期、仍有稀釋疑慮"}, {"scenario": "空頭", "prob": 0.25, "low": 50, "high": 58, "trigger": "營收或毛利率低於指引、DSP/TIA 缺料延遲、宣布第四輪增發"}], "snapshot": [{"metric": "close", "label": "10/30 收盤", "value": 69.05}, {"metric": "chg", "label": "單日漲跌", "value": -0.128}, {"metric": "day_low", "label": "日低", "value": 65.77}, {"metric": "day_high", "label": "日高", "value": 74.25}, {"metric": "prev_close", "label": "前收", "value": 79.19}, {"metric": "high52", "label": "52週高 (5/13)", "value": 233.67}, {"metric": "low52", "label": "52週低", "value": 18.5}, {"metric": "mcap", "label": "市值", "value": 5863000000.0}, {"metric": "shares", "label": "流通股數", "value": 84910000.0}, {"metric": "short_shares", "label": "9/30 申報", "value": 13870000.0}, {"metric": "dtc", "label": "空單回補天數", "value": 2.0}, {"metric": "implied_move", "label": "財報週 · 11/6 到期", "value": 0.1861}, {"metric": "beta", "label": "Beta", "value": 3.85}, {"metric": "atm_price", "label": "第三輪 ATM 均價", "value": 105.36}, {"metric": "atm_shares", "label": "第三輪 ATM 新股", "value": 5690000.0}, {"metric": "implied_month", "label": "月隱含波動（11/20 到期）", "value": 0.2375}, {"metric": "rev_2026", "label": "2026 全年營收指引", "value": 1100000000.0}, {"metric": "next_earnings", "label": "11/5 美東盤後", "value": 20261105}], "valuation": [{"case": "保守", "ps": 3, "basis": "光模組同業低迷期常見的營收倍數"}, {"case": "8 月水準", "ps": 4, "basis": "8 月時市場給 AAOI 的預估營收倍數約 4 倍"}, {"case": "同業", "ps": 5.8, "basis": "Coherent 目前股價營收比約 5.8 倍"}, {"case": "樂觀", "ps": 8, "basis": "維持高成長溢價，接近 AAOI 目前過去 12 個月營收倍數"}]};
   const store = {}; Object.keys(DATA).forEach((k) => store[k] = DATA[k]);
   const draws = {}; const fns = [];
   const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -63,6 +63,13 @@ body{margin:0;background:var(--color-bg);color:var(--color-fg)}
 .ax .scen { min-height: 214px; }
 .ax .rev { min-height: 240px; }
 .ax .ls { min-height: 64px; }
+.ax .price { min-height: 300px; }
+.ax .dist { min-height: 220px; }
+.ax .er { min-height: 200px; }
+.ax .val { min-height: 190px; }
+.ax .peers { min-height: 150px; }
+.ax .scroll { max-height: 22rem; overflow: auto; }
+.ax .scroll th { position: sticky; top: 0; background: var(--color-panel); }
 .ax table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
 .ax th { text-align: left; color: var(--color-fg-muted); font-weight: var(--cds-font-weight-medium); padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); }
 .ax td { padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); vertical-align: top; line-height: 1.5; }
@@ -78,13 +85,13 @@ body{margin:0;background:var(--color-bg);color:var(--color-fg)}
 
 <div class="ax">
   <h1 id="top">AAOI 籌碼與點位儀表板</h1>
-  <p class="lede">10/30 收盤 <b data-draw="v-close" data-source="snapshot" data-field="value" data-where="metric=close">—</b>，財報（11/5 美東盤後）週選擇權隱含波動約 ±<b data-draw="v-im" data-source="snapshot" data-field="value" data-where="metric=implied_move">—</b>，對應區間 <b data-draw="v-bandlo" data-source="stats" data-field="value" data-where="key=band_low">—</b>–<b data-draw="v-bandhi" data-source="stats" data-field="value" data-where="key=band_high">—</b>；三情境機率加權預期價 <b data-draw="v-ev" data-source="ev" data-field="value" data-where="key=ev">—</b>。關鍵多空分界：上看跳空缺口 <b data-draw="v-gap" data-source="levels" data-field="price" data-where="reason=10%2F29%20收盤，10%2F30%20跳空缺口上緣">—</b> 能否收復，下守前低 <b data-draw="v-low" data-source="snapshot" data-field="value" data-where="metric=day_low">—</b>。</p>
+  <p class="lede"><span data-draw="lbl-close" data-source="snapshot" data-field="label" data-where="metric=close">—</span> <b data-draw="v-close" data-source="snapshot" data-field="value" data-where="metric=close">—</b>，下次財報 <span data-draw="lbl-er" data-source="snapshot" data-field="label" data-where="metric=next_earnings">—</span>，財報週選擇權隱含波動約 ±<b data-draw="v-im" data-source="snapshot" data-field="value" data-where="metric=implied_move">—</b>，對應區間 <b data-draw="v-bandlo" data-source="stats" data-field="value" data-where="key=band_low">—</b>–<b data-draw="v-bandhi" data-source="stats" data-field="value" data-where="key=band_high">—</b>；三情境機率加權預期價 <b data-draw="v-ev" data-source="ev" data-field="value" data-where="key=ev">—</b>。關鍵多空分界：上看跳空缺口 <b data-draw="v-gap" data-source="levels" data-field="price" data-where="reason=10%2F29%20收盤，10%2F30%20跳空缺口上緣">—</b> 能否收復，下守前低 <b data-draw="v-low" data-source="snapshot" data-field="value" data-where="metric=day_low">—</b>。</p>
 
   <div class="tiles">
-    <div class="card tile"><div class="k">收盤價 · 10/30</div><div class="v" data-draw="t-close" data-source="snapshot" data-field="value" data-where="metric=close">—</div><div class="s">單日 <span data-draw="t-chg" data-source="snapshot" data-field="value" data-where="metric=chg">—</span></div></div>
-    <div class="card tile"><div class="k">距 52 週高點</div><div class="v" data-draw="t-dd" data-source="stats" data-field="value" data-where="key=drawdown">—</div><div class="s">高點 <span data-draw="t-high" data-source="snapshot" data-field="value" data-where="metric=high52">—</span>（5/13）</div></div>
-    <div class="card tile"><div class="k">空單占流通股</div><div class="v" data-draw="t-si" data-source="stats" data-field="value" data-where="key=short_pct">—</div><div class="s">回補 <span data-draw="t-dtc" data-source="snapshot" data-field="value" data-where="metric=dtc">—</span> 天 · 9/30 申報</div></div>
-    <div class="card tile"><div class="k">財報週隱含波動</div><div class="v" data-draw="t-im" data-source="snapshot" data-field="value" data-where="metric=implied_move">—</div><div class="s">11/6 到期週選擇權</div></div>
+    <div class="card tile"><div class="k" data-draw="lbl-close2" data-source="snapshot" data-field="label" data-where="metric=close">—</div><div class="v" data-draw="t-close" data-source="snapshot" data-field="value" data-where="metric=close">—</div><div class="s">單日 <span data-draw="t-chg" data-source="snapshot" data-field="value" data-where="metric=chg">—</span></div></div>
+    <div class="card tile"><div class="k">距 52 週高點</div><div class="v" data-draw="t-dd" data-source="stats" data-field="value" data-where="key=drawdown">—</div><div class="s">高點 <span data-draw="t-high" data-source="snapshot" data-field="value" data-where="metric=high52">—</span></div></div>
+    <div class="card tile"><div class="k">空單占流通股</div><div class="v" data-draw="t-si" data-source="stats" data-field="value" data-where="key=short_pct">—</div><div class="s">回補 <span data-draw="t-dtc" data-source="snapshot" data-field="value" data-where="metric=dtc">—</span> 天 · <span data-draw="lbl-si" data-source="snapshot" data-field="label" data-where="metric=short_shares">—</span></div></div>
+    <div class="card tile"><div class="k">選擇權隱含波動</div><div class="v" data-draw="t-im" data-source="snapshot" data-field="value" data-where="metric=implied_move">—</div><div class="s" data-draw="lbl-im" data-source="snapshot" data-field="label" data-where="metric=implied_move">—</div></div>
     <div class="card tile"><div class="k">市值</div><div class="v" data-draw="t-mcap" data-source="snapshot" data-field="value" data-where="metric=mcap">—</div><div class="s">Beta <span data-draw="t-beta" data-source="snapshot" data-field="value" data-where="metric=beta">—</span></div></div>
   </div>
 
@@ -93,6 +100,25 @@ body{margin:0;background:var(--color-bg);color:var(--color-fg)}
     <h3>九項因子的多空分數加總</h3>
     <p class="note">每項因子 −2 到 +2 分，由新聞、財報與籌碼資料主觀評分；多方占比 = 正分總和 ÷ 正負分絕對值總和。</p>
     <div class="chart ls" data-draw="ls" data-source="lsratio"></div>
+  </div>
+
+  <h2 id="trend">走勢與同業</h2>
+  <div class="grid">
+    <div class="card" style="grid-column: 1 / -1;">
+      <h3>日線收盤與關鍵點位</h3>
+      <p class="note">藍線為每日收盤，淡灰直線為當日高低區間；虛線為強度 3 分以上、落在圖內的壓力（紅）與支撐（綠）。每日排程會自動補上新的交易日。</p>
+      <div class="chart price" data-draw="price" data-source="prices levels"></div>
+    </div>
+    <div class="card">
+      <h3>光通訊同業單日漲跌</h3>
+      <p class="note">同一交易日的漲跌幅，用來分辨是 AAOI 自身問題，還是整個族群在跌。</p>
+      <div class="chart peers" data-draw="peers" data-source="peers"></div>
+    </div>
+    <div class="card">
+      <h3>估值區間（股價營收比）</h3>
+      <p class="note">全年營收指引 ÷ 流通股數，乘上不同營收倍數換算的股價；直線為現價。</p>
+      <div class="chart val" data-draw="val" data-source="valcalc snapshot"></div>
+    </div>
   </div>
 
   <h2 id="levels">點位地圖</h2>
@@ -118,6 +144,41 @@ body{margin:0;background:var(--color-bg);color:var(--color-fg)}
         <thead><tr><th data-field="scenario">情境</th><th data-field="prob" class="num">機率</th><th data-field="low" class="num">低</th><th data-field="high" class="num">高</th><th data-field="trigger" class="hide-n">觸發條件</th></tr></thead>
         <tbody data-draw="scen-body"></tbody>
       </table>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-top: var(--cds-gap-md);">
+    <div class="card">
+      <h3>選擇權隱含的價格機率分佈</h3>
+      <p class="note">以財報週隱含波動推算的到期收盤價分佈（對數常態），深色為 ±1 個預期波動區間。這是市場定價出來的機率，不是方向判斷。</p>
+      <div class="chart dist" data-draw="dist" data-source="dist snapshot"></div>
+    </div>
+    <div class="card">
+      <h3>各點位的市場隱含機率</h3>
+      <p class="note">壓力為到期收在該價以上的機率，支撐為跌破該價的機率。</p>
+      <div class="scroll">
+      <table data-source="levelprob" data-row-key="price">
+        <thead><tr><th data-field="price" class="num">點位</th><th data-field="side">類型</th><th data-field="prob" class="num">機率</th><th data-field="reason" class="hide-n">依據</th></tr></thead>
+        <tbody data-draw="lp-body"></tbody>
+      </table>
+      </div>
+    </div>
+    <div class="card">
+      <h3>歷次財報後的股價反應</h3>
+      <p class="note">財報後第一個交易日的漲跌；虛線為當時選擇權隱含的波動幅度（有資料時）。</p>
+      <div class="chart er" data-draw="er" data-source="earnings_moves"></div>
+    </div>
+  </div>
+
+  <h2 id="track">預測成績單</h2>
+  <div class="card">
+    <h3>每日預測與事後驗證</h3>
+    <p class="note">每天記錄當時的預測區間（現價 ± 週隱含波動）、加權預期價與多空偏向，5 個交易日後對照實際收盤：收在區間內記為命中。已驗證 <b data-draw="hr-n" data-source="hitrate" data-field="value" data-where="key=checked">—</b> 筆，命中率 <b data-draw="hr-r" data-source="hitrate" data-field="value" data-where="key=rate">—</b>。</p>
+    <div class="scroll">
+    <table data-source="predictions" data-row-key="date">
+      <thead><tr><th data-field="date">預測日</th><th data-field="base_close" class="num">基準價</th><th data-field="band_low" class="num">區間低</th><th data-field="band_high" class="num">區間高</th><th data-field="ev" class="num hide-n">預期價</th><th data-field="bias">偏向</th><th data-field="check_date" class="hide-n">驗證日</th><th data-field="actual" class="num">實際</th><th data-field="result">結果</th></tr></thead>
+      <tbody data-draw="pred-body"></tbody>
+    </table>
     </div>
   </div>
 
@@ -199,6 +260,65 @@ body{margin:0;background:var(--color-bg);color:var(--color-fg)}
     },
   });
 
+  const ncdf = (z) => {
+    const t = 1 / (1 + 0.2316419 * Math.abs(z));
+    const d = 0.3989423 * Math.exp(-z * z / 2);
+    const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+    return z > 0 ? 1 - p : p;
+  };
+  window.axNcdf = ncdf;
+  dash.calc('dist', {
+    inputs: ['snapshot'],
+    title: '隱含價格分佈',
+    description: '以收盤價與週隱含波動（視為 0.8 個標準差）推算的對數常態分佈：每個價位的機率密度與跌破機率。',
+    fn: (snapshot) => {
+      const g = (m) => +(snapshot.find((r) => r.metric === m) || {}).value;
+      const c = g('close'), s = g('implied_move') / 0.8;
+      const ncdf = (z) => { const t = 1 / (1 + 0.2316419 * Math.abs(z)); const d = 0.3989423 * Math.exp(-z * z / 2); const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - p : p; };
+      const out = [];
+      for (let i = 0; i <= 120; i++) {
+        const x = c * (0.45 + i * 1.25 / 120);
+        const z = (Math.log(x / c) + s * s / 2) / s;
+        out.push({price: x, density: Math.exp(-z * z / 2) / (x * s * Math.sqrt(2 * Math.PI)), below: ncdf(z)});
+      }
+      return out;
+    },
+  });
+  dash.calc('levelprob', {
+    inputs: ['levels', 'snapshot'],
+    title: '點位隱含機率',
+    description: '同一分佈下，壓力為收在其上的機率、支撐為跌破的機率。',
+    fn: (levels, snapshot) => {
+      const g = (m) => +(snapshot.find((r) => r.metric === m) || {}).value;
+      const c = g('close'), s = g('implied_move') / 0.8;
+      const ncdf = (z) => { const t = 1 / (1 + 0.2316419 * Math.abs(z)); const d = 0.3989423 * Math.exp(-z * z / 2); const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - p : p; };
+      return levels.map((l) => {
+        const below = ncdf((Math.log(+l.price / c) + s * s / 2) / s);
+        return {price: +l.price, side: l.side, prob: l.side === '壓力' ? 1 - below : below, reason: l.reason};
+      }).sort((a, b) => b.price - a.price);
+    },
+  });
+  dash.calc('valcalc', {
+    inputs: ['valuation', 'snapshot'],
+    title: '估值換算股價',
+    description: '全年營收指引 ÷ 流通股數 × 營收倍數。',
+    fn: (valuation, snapshot) => {
+      const g = (m) => +(snapshot.find((r) => r.metric === m) || {}).value;
+      const rps = g('rev_2026') / g('shares');
+      return valuation.map((v) => ({case: v.case, ps: +v.ps, price: +v.ps * rps, basis: v.basis}));
+    },
+  });
+  dash.calc('hitrate', {
+    inputs: ['predictions'],
+    title: '預測命中率',
+    description: '已驗證的預測筆數，與實際收盤落在預測區間內的比例。',
+    fn: (predictions) => {
+      const done = predictions.filter((p) => p.result === '命中' || p.result === '未中');
+      const hit = done.filter((p) => p.result === '命中').length;
+      return [{key: 'checked', value: done.length}, {key: 'rate', value: done.length ? hit / done.length : null}];
+    },
+  });
+
   const val = (id, k, keyCol = 'metric') => {
     const r = rows(id).find((x) => x[keyCol] === k);
     return r ? +r.value : null;
@@ -224,6 +344,17 @@ body{margin:0;background:var(--color-bg);color:var(--color-fg)}
   vDraw('t-si', 'stats', 'short_pct', pct1, 'key');
   vDraw('v-ev', 'ev', 'ev', usd, 'key');
   vDraw('v-low', 'snapshot', 'day_low', usd);
+  vDraw('hr-n', 'hitrate', 'checked', d3.format('d'), 'key');
+  dash.draw('hr-r', (el) => { const r = rows('hitrate').find((x) => x.key === 'rate'); el.textContent = !r ? '—' : r.value == null ? '尚無' : pct1(+r.value); });
+  const lblDraw = (name, metric) => dash.draw(name, (el) => {
+    const r = rows('snapshot').find((x) => x.metric === metric);
+    el.textContent = r ? r.label : '—';
+  });
+  lblDraw('lbl-close', 'close');
+  lblDraw('lbl-close2', 'close');
+  lblDraw('lbl-er', 'next_earnings');
+  lblDraw('lbl-si', 'short_shares');
+  lblDraw('lbl-im', 'implied_move');
   dash.draw('v-gap', (el) => { const r = rows('levels').find((x) => String(x.reason).includes('跳空缺口')); el.textContent = r ? usd(+r.price) : '—'; });
 })();
 </script>
@@ -404,11 +535,180 @@ body{margin:0;background:var(--color-bg);color:var(--color-fg)}
     });
   });
 
+  const axisStyle = (g) => {
+    g.attr('font-size', null).attr('font-family', null);
+    g.selectAll('text').style('fill', 'var(--color-fg-muted)').attr('font-size', 11);
+    g.selectAll('line,path').style('stroke', 'var(--cds-chart-axis)');
+  };
+
+  // Price history with levels
+  dash.draw('price', (el) => {
+    if (!guard(el, ['prices', 'levels'])) return;
+    const ps = rows('prices').map((r) => ({...r, d: new Date(r.date + 'T00:00:00Z'), close: +r.close, high: r.high == null ? null : +r.high, low: r.low == null ? null : +r.low})).sort((a, b) => a.d - b.d);
+    const w = Math.max(300, el.clientWidth), h = 300;
+    const svg = svgFor(el, w, h);
+    const tip = tipper(el);
+    const lo = d3.min(ps, (p) => p.low ?? p.close), hi = d3.max(ps, (p) => p.high ?? p.close);
+    const yd = [lo * 0.92, hi * 1.03];
+    const lv = rows('levels').map((l) => ({...l, price: +l.price, strength: +l.strength})).filter((l) => l.strength >= 3 && l.price >= yd[0] && l.price <= yd[1]);
+    const y = d3.scaleLinear(yd, [h - 24, 8]).nice();
+    const ticks = y.ticks(5);
+    const ml = d3.max(ticks, (t) => txtW(svg, '$' + t, 11)) + 8;
+    const mr = d3.max(lv.length ? lv : [{price: 0}], (l) => txtW(svg, usd(l.price), 11)) + 10;
+    const x = d3.scaleUtc(d3.extent(ps, (p) => p.d), [ml, w - mr]);
+    ticks.forEach((t) => {
+      svg.append('line').attr('x1', ml).attr('x2', w - mr).attr('y1', y(t)).attr('y2', y(t)).style('stroke', 'var(--cds-chart-grid)');
+      svg.append('text').attr('x', ml - 6).attr('y', y(t) + 4).attr('text-anchor', 'end').attr('font-size', 11).style('fill', 'var(--color-fg-muted)').text('$' + t);
+    });
+    const xa = svg.append('g').attr('transform', `translate(0,${h - 24})`).call(d3.axisBottom(x).ticks(Math.max(2, Math.floor((w - ml - mr) / 80))).tickFormat(d3.utcFormat('%-m/%-d')).tickSizeOuter(0));
+    axisStyle(xa);
+    let lastY = -99;
+    lv.sort((a, b) => a.price - b.price).forEach((l) => {
+      const col = l.side === '壓力' ? 'var(--color-bad)' : 'var(--color-ok)';
+      svg.append('line').attr('x1', ml).attr('x2', w - mr).attr('y1', y(l.price)).attr('y2', y(l.price)).style('stroke', col).style('opacity', .55).attr('stroke-dasharray', '4 3');
+      const ty = y(l.price) + 4;
+      if (Math.abs(ty - lastY) >= 12) { svg.append('text').attr('x', w - mr + 4).attr('y', ty).attr('font-size', 11).style('fill', col).text(usd(l.price)); lastY = ty; }
+    });
+    ps.filter((p) => p.high != null && p.low != null).forEach((p) => {
+      svg.append('line').attr('x1', x(p.d)).attr('x2', x(p.d)).attr('y1', y(p.high)).attr('y2', y(p.low)).style('stroke', 'var(--cds-chart-muted)').attr('stroke-width', 2).style('opacity', .55);
+    });
+    svg.append('path').datum(ps).attr('d', d3.line().x((p) => x(p.d)).y((p) => y(p.close))).style('fill', 'none').style('stroke', dash.colors[0]).attr('stroke-width', 2).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round');
+    const last = ps[ps.length - 1];
+    svg.append('circle').attr('cx', x(last.d)).attr('cy', y(last.close)).attr('r', 3.5).style('fill', dash.colors[0]);
+    const dot = svg.append('circle').attr('r', 4).style('fill', dash.colors[0]).style('display', 'none');
+    const bis = d3.bisector((p) => p.d).center;
+    svg.append('rect').attr('x', ml).attr('y', 0).attr('width', w - ml - mr).attr('height', h - 24).style('fill', 'transparent')
+      .on('mousemove', (ev) => {
+        const [mx] = d3.pointer(ev);
+        const p = ps[bis(ps, x.invert(mx))];
+        dot.style('display', null).attr('cx', x(p.d)).attr('cy', y(p.close));
+        const lines = [`收盤 ${usd(p.close)}`];
+        if (p.high != null && p.low != null) lines.push(`高 ${usd(p.high)} · 低 ${usd(p.low)}`);
+        if (p.volume) lines.push(`成交量 ${d3.format('.3s')(p.volume)}`);
+        tip.show(ev, d3.utcFormat('%Y/%-m/%-d')(p.d), lines);
+      })
+      .on('mouseleave', () => { dot.style('display', 'none'); tip.hide(); });
+  });
+
+  // Peers
+  dash.draw('peers', (el) => {
+    if (!guard(el, ['peers'])) return;
+    const pr = rows('peers').map((r) => ({...r, chg: +r.chg})).sort((a, b) => a.chg - b.chg);
+    const rowH = 30, h = pr.length * rowH + 24;
+    const w = Math.max(280, el.clientWidth);
+    const svg = svgFor(el, w, h);
+    const tip = tipper(el);
+    const lab = d3.max(pr, (p) => txtW(svg, p.ticker, 12)) + 10;
+    const lw = d3.max(pr, (p) => txtW(svg, spct(p.chg), 11)) + 8;
+    const mn = Math.min(0, d3.min(pr, (p) => p.chg)), mx = Math.max(0, d3.max(pr, (p) => p.chg));
+    const x = d3.scaleLinear([mn, mx], [lab + (mn < 0 ? lw : 0), w - (mx > 0 ? lw : 4)]);
+    pr.forEach((p, i) => {
+      const yy = 8 + i * rowH;
+      const isA = p.ticker === 'AAOI';
+      svg.append('text').attr('x', 0).attr('y', yy + 15).attr('font-size', 12).attr('font-weight', isA ? 600 : 400).style('fill', 'var(--color-fg)').text(p.ticker);
+      const x0 = x(Math.min(0, p.chg)), x1 = x(Math.max(0, p.chg));
+      svg.append('rect').attr('x', x0).attr('y', yy + 3).attr('width', Math.max(1, x1 - x0)).attr('height', 16).attr('rx', 3)
+        .style('fill', isA ? (p.chg < 0 ? 'var(--color-bad)' : 'var(--color-ok)') : 'var(--cds-chart-muted)').style('opacity', isA ? .9 : .7)
+        .on('mousemove', (e) => tip.show(e, `${p.name}（${p.ticker}）`, [`收盤 ${usd(+p.close)}`, `單日 ${spct(p.chg)}`]))
+        .on('mouseleave', () => tip.hide());
+      svg.append('text').attr('x', p.chg < 0 ? x0 - 4 : x1 + 4).attr('y', yy + 15).attr('text-anchor', p.chg < 0 ? 'end' : 'start').attr('font-size', 11).style('fill', 'var(--color-fg-muted)').text(spct(p.chg));
+    });
+    svg.append('line').attr('x1', x(0)).attr('x2', x(0)).attr('y1', 4).attr('y2', h - 18).style('stroke', 'var(--cds-chart-axis)');
+  });
+
+  // Valuation
+  dash.draw('val', (el) => {
+    if (!guard(el, ['valcalc', 'snapshot'])) return;
+    const vr = rows('valcalc');
+    const close = +(rows('snapshot').find((r) => r.metric === 'close') || {}).value;
+    const rowH = 34, h = vr.length * rowH + 30, w = Math.max(280, el.clientWidth);
+    const svg = svgFor(el, w, h);
+    const tip = tipper(el);
+    const lab = d3.max(vr, (v) => txtW(svg, `${v.case} ${v.ps}x`, 12)) + 10;
+    const vw = d3.max(vr, (v) => txtW(svg, usd(v.price), 11)) + 8;
+    const x = d3.scaleLinear([0, d3.max([...vr.map((v) => v.price), close]) * 1.05], [lab, w - vw]);
+    vr.forEach((v, i) => {
+      const yy = 22 + i * rowH;
+      svg.append('text').attr('x', 0).attr('y', yy + 13).attr('font-size', 12).style('fill', 'var(--color-fg)').text(`${v.case} ${v.ps}x`);
+      svg.append('rect').attr('x', lab).attr('y', yy).attr('width', Math.max(1, x(v.price) - lab)).attr('height', 18).attr('rx', 3)
+        .style('fill', v.price >= close ? 'var(--color-ok)' : 'var(--color-bad)').style('opacity', .6)
+        .on('mousemove', (e) => tip.show(e, `${v.case}：${v.ps} 倍營收`, [`換算股價 ${usd(v.price)}`, `相對現價 ${spct(v.price / close - 1)}`, v.basis]))
+        .on('mouseleave', () => tip.hide());
+      svg.append('text').attr('x', x(v.price) + 4).attr('y', yy + 13).attr('font-size', 11).style('fill', 'var(--color-fg-muted)').text(usd(v.price));
+    });
+    svg.append('line').attr('x1', x(close)).attr('x2', x(close)).attr('y1', 14).attr('y2', h).style('stroke', 'var(--color-fg)').attr('stroke-width', 1.5);
+    svg.append('text').attr('x', x(close)).attr('y', 10).attr('text-anchor', 'middle').attr('font-size', 11).style('fill', 'var(--color-fg)').text('現價 ' + usd(close));
+  });
+
+  // Probability distribution
+  dash.draw('dist', (el) => {
+    if (!guard(el, ['dist', 'snapshot'])) return;
+    const dr = rows('dist');
+    const snap = rows('snapshot'); const g = (m) => +(snap.find((r) => r.metric === m) || {}).value;
+    const close = g('close'), im = g('implied_move');
+    const w = Math.max(280, el.clientWidth), h = 220;
+    const svg = svgFor(el, w, h);
+    const tip = tipper(el);
+    const x = d3.scaleLinear(d3.extent(dr, (d) => d.price), [8, w - 8]);
+    const y = d3.scaleLinear([0, d3.max(dr, (d) => d.density) * 1.15], [h - 24, 18]);
+    const xa = svg.append('g').attr('transform', `translate(0,${h - 24})`).call(d3.axisBottom(x).ticks(Math.max(3, Math.floor(w / 80))).tickFormat((v) => '$' + v).tickSizeOuter(0));
+    axisStyle(xa);
+    const area = d3.area().x((d) => x(d.price)).y0(h - 24).y1((d) => y(d.density));
+    svg.append('path').datum(dr).attr('d', area).style('fill', dash.colors[0]).style('opacity', .12);
+    const band = dr.filter((d) => d.price >= close * (1 - im) && d.price <= close * (1 + im));
+    svg.append('path').datum(band).attr('d', area).style('fill', dash.colors[0]).style('opacity', .28);
+    svg.append('path').datum(dr).attr('d', d3.line().x((d) => x(d.price)).y((d) => y(d.density))).style('fill', 'none').style('stroke', dash.colors[0]).attr('stroke-width', 2);
+    svg.append('line').attr('x1', x(close)).attr('x2', x(close)).attr('y1', 14).attr('y2', h - 24).style('stroke', 'var(--color-fg)').attr('stroke-width', 1.5);
+    svg.append('text').attr('x', x(close)).attr('y', 10).attr('text-anchor', 'middle').attr('font-size', 11).style('fill', 'var(--color-fg)').text('現價 ' + usd(close));
+    const dot = svg.append('circle').attr('r', 4).style('fill', dash.colors[0]).style('display', 'none');
+    const bis = d3.bisector((d) => d.price).center;
+    svg.append('rect').attr('x', 0).attr('y', 0).attr('width', w).attr('height', h - 24).style('fill', 'transparent')
+      .on('mousemove', (ev) => {
+        const d = dr[bis(dr, x.invert(d3.pointer(ev)[0]))];
+        dot.style('display', null).attr('cx', x(d.price)).attr('cy', y(d.density));
+        tip.show(ev, usd(d.price), [`收在此價以下 ${pct1(d.below)}`, `收在此價以上 ${pct1(1 - d.below)}`]);
+      })
+      .on('mouseleave', () => { dot.style('display', 'none'); tip.hide(); });
+  });
+
+  // Earnings reactions
+  dash.draw('er', (el) => {
+    if (!guard(el, ['earnings_moves'])) return;
+    const em = rows('earnings_moves').map((r) => ({...r, move: r.move == null ? null : +r.move, implied: r.implied == null ? null : +r.implied}));
+    const w = Math.max(280, el.clientWidth), h = 200, mb = 24;
+    const svg = svgFor(el, w, h);
+    const tip = tipper(el);
+    const ext = d3.max(em, (d) => Math.max(Math.abs(d.move || 0), d.implied || 0)) * 1.2;
+    const y = d3.scaleLinear([-ext, ext], [h - mb, 16]);
+    const ticks = y.ticks(4);
+    const ml = d3.max(ticks, (t) => txtW(svg, d3.format('+.0%')(t), 11)) + 8;
+    const x = d3.scaleBand(em.map((d) => d.quarter), [ml, w - 4]).padding(.35);
+    ticks.forEach((t) => {
+      svg.append('line').attr('x1', ml).attr('x2', w - 4).attr('y1', y(t)).attr('y2', y(t)).style('stroke', t === 0 ? 'var(--cds-chart-axis)' : 'var(--cds-chart-grid)');
+      svg.append('text').attr('x', ml - 6).attr('y', y(t) + 4).attr('text-anchor', 'end').attr('font-size', 11).style('fill', 'var(--color-fg-muted)').text(t === 0 ? '0' : d3.format('+.0%')(t));
+    });
+    const bw = Math.min(32, x.bandwidth());
+    em.forEach((d) => {
+      const cx = x(d.quarter) + x.bandwidth() / 2;
+      if (d.move != null) {
+        svg.append('rect').attr('x', cx - bw / 2).attr('y', y(Math.max(0, d.move))).attr('width', bw).attr('height', Math.abs(y(d.move) - y(0))).attr('rx', 3)
+          .style('fill', d.move >= 0 ? 'var(--color-ok)' : 'var(--color-bad)').style('opacity', .8);
+        svg.append('text').attr('x', cx).attr('y', d.move >= 0 ? y(d.move) - 5 : y(d.move) + 13).attr('text-anchor', 'middle').attr('font-size', 11).style('fill', 'var(--color-fg)').text(spct(d.move));
+      }
+      if (d.implied != null) [d.implied, -d.implied].forEach((v) => svg.append('line').attr('x1', cx - bw / 2 - 5).attr('x2', cx + bw / 2 + 5).attr('y1', y(v)).attr('y2', y(v)).style('stroke', 'var(--color-fg)').attr('stroke-dasharray', '3 2').attr('stroke-width', 1.5));
+      svg.append('text').attr('x', cx).attr('y', h - 6).attr('text-anchor', 'middle').attr('font-size', 11).style('fill', 'var(--color-fg-muted)').text(d.quarter);
+      svg.append('rect').attr('x', x(d.quarter)).attr('y', 0).attr('width', x.bandwidth()).attr('height', h - mb).style('fill', 'transparent')
+        .on('mousemove', (e) => tip.show(e, `${d.quarter} · ${d.date}`, [`財報前收盤 ${usd(+d.pre_close)}`, d.move == null ? '反應未知' : `隔日 ${spct(d.move)}`, d.implied == null ? '' : `隱含波動 ±${pct1(d.implied)}`, d.note].filter(Boolean)))
+        .on('mouseleave', () => tip.hide());
+    });
+  });
+
   // Tables
   const body = (name, id, cols) => dash.draw(name, (tb) => {
     tb.replaceChildren();
     rows(id).forEach((r) => {
       const tr = document.createElement('tr');
+      tr.dataset.key = String(r[cols[0][0]]);
       cols.forEach(([f, fmt, cls]) => {
         const td = document.createElement('td');
         td.textContent = fmt ? fmt(r[f], r) : r[f];
@@ -423,6 +723,9 @@ body{margin:0;background:var(--color-bg);color:var(--color-fg)}
   body('an-body', 'analysts', [['firm', null, 'nw'], ['rating', null, 'nw'], ['target', (v) => usd(+v), 'num'], ['date', null, 'num']]);
   body('fac-body', 'factors', [['factor', null, 'nw'], ['score', (v) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v), (v) => 'num ' + (v > 0 ? 'ok' : v < 0 ? 'bad' : '')], ['note']]);
   body('news-body', 'news', [['date', null, 'nw'], ['tone', null, toneCls], ['headline']]);
+  body('lp-body', 'levelprob', [['price', (v) => usd(+v), 'num'], ['side', null, (v) => (v === '壓力' ? 'bad nw' : 'ok nw')], ['prob', (v) => pct1(+v), 'num'], ['reason', null, 'hide-n']]);
+  const money = (v) => (v == null ? '—' : usd(+v));
+  body('pred-body', 'predictions', [['date', null, 'nw'], ['base_close', money, 'num'], ['band_low', money, 'num'], ['band_high', money, 'num'], ['ev', money, 'num hide-n'], ['bias', null, (v) => (v === '偏多' ? 'ok nw' : v === '偏空' ? 'bad nw' : 'nw')], ['check_date', null, 'nw hide-n'], ['actual', money, 'num'], ['result', null, (v) => (v === '命中' ? 'ok nw' : v === '未中' ? 'bad nw' : 'nw')]]);
 })();
 </script>
 
