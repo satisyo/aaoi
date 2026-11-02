@@ -1,0 +1,4162 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>智慧建築標章計分工具</title>
+<meta name="description" content="依 2024 版智慧建築評估手冊的試算工具：勾選評估項目，即時掌握總分、標章等級與缺口。">
+<style>
+/* 智慧建築標章計分工具 — 樣式
+ * 設計原則：專業工程管理工具；顏色只用來表達狀態與等級，狀態一律同時有文字與圖示。 */
+:root {
+  --bg: #e8ecf2; --sf: #ffffff; --sf2: #f3f6fa; --hd: #2c4160; --hdt: #ffffff; --tx: #142033; --mu: #586a80; --bd: #d6dde8;
+  --ac: #1b5fc1; --acs: #e5eefb; --ont: #ffffff;
+  --ok: #17794f; --oks: #e4f4ec; --warn: #8a5a00; --warns: #fdf1d8; --bad: #b0281c; --bads: #fbe7e4;
+  --base: #1b5fc1; --bonus: #0d857a;
+  --g0: #2e8b57; --g1: #a8643a; --g2: #6a7789; --g3: #a47a08; --g4: #1b6fd6;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a0f16; --sf: #151d28; --sf2: #1b2532; --hd: #2a4262; --hdt: #eaf1fb; --tx: #e6ecf4; --mu: #9aa9bc; --bd: #2a3647;
+    --ac: #6aa5ff; --acs: #182b49; --ont: #07162b;
+    --ok: #4cc58b; --oks: #123326; --warn: #e0b34a; --warns: #3a2d0e; --bad: #ff8b7f; --bads: #3d1a17;
+    --base: #6aa5ff; --bonus: #3fcfc0;
+    --g0: #4cc58b; --g1: #e0956a; --g2: #a9b4c4; --g3: #e2b83c; --g4: #62a6ff;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a0f16; --sf: #151d28; --sf2: #1b2532; --hd: #2a4262; --hdt: #eaf1fb; --tx: #e6ecf4; --mu: #9aa9bc; --bd: #2a3647;
+  --ac: #6aa5ff; --acs: #182b49; --ont: #07162b;
+  --ok: #4cc58b; --oks: #123326; --warn: #e0b34a; --warns: #3a2d0e; --bad: #ff8b7f; --bads: #3d1a17;
+  --base: #6aa5ff; --bonus: #3fcfc0;
+  --g0: #4cc58b; --g1: #e0956a; --g2: #a9b4c4; --g3: #e2b83c; --g4: #62a6ff;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--tx); font: 15px/1.55 "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--ac); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- 固定區 ---------- */
+.stick { position: sticky; top: 0; z-index: 20; background: var(--sf); border-bottom: 1px solid var(--bd); box-shadow: 0 1px 0 rgba(0, 0, 0, .02); }
+.top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 16px; }
+.top h1 { font-size: 16px; font-weight: 700; margin: 0; letter-spacing: .02em; white-space: nowrap; }
+.top .sp { margin-left: auto; }
+.seg { display: inline-flex; border: 1px solid var(--bd); border-radius: 8px; overflow: hidden; background: var(--sf); max-width: 100%; }
+.seg button { border: 0; background: transparent; padding: 5px 12px; white-space: nowrap; }
+.seg button + button { border-left: 1px solid var(--bd); }
+.seg button[aria-pressed="true"] { background: var(--ac); color: var(--ont); font-weight: 600; }
+.catrow { display: flex; align-items: center; gap: 8px; padding: 0 16px 8px; overflow-x: auto; }
+.catrow[hidden] { display: none; }
+.catrow .lb { color: var(--mu); font-size: 13px; white-space: nowrap; }
+.bt { border: 1px solid var(--bd); background: var(--sf); border-radius: 8px; padding: 5px 11px; white-space: nowrap; }
+@media (hover: hover) { .bt:hover { background: var(--sf2); } }
+.bt.pri { background: var(--ac); border-color: var(--ac); color: var(--ont); font-weight: 600; }
+.bt.dng { color: var(--bad); }
+.bt.sm { padding: 2px 9px; font-size: 13px; }
+.proj { max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+.savest { font-size: 12.5px; color: var(--mu); white-space: nowrap; }
+.savest.err { color: var(--bad); font-weight: 600; }
+
+/* ---------- 儀表板 ---------- */
+#dash { display: grid; grid-template-columns: 132px minmax(0, 1.1fr) minmax(0, 1fr); gap: 10px 22px; align-items: center; padding: 10px 16px 12px; border-top: 1px solid var(--bd); }
+#dash[hidden] { display: none; }
+.ring svg { width: 132px; height: 132px; display: block; }
+.ring .tr { fill: none; stroke: var(--sf2); stroke-width: 11; }
+.ring .pr { fill: none; stroke: var(--gc, var(--ac)); stroke-width: 11; transition: stroke-dasharray .3s; }
+.ring .tk { stroke: var(--tx); stroke-width: 2; opacity: .5; }
+.ring .big { font-size: 32px; font-weight: 700; text-anchor: middle; fill: var(--tx); font-variant-numeric: tabular-nums; }
+.ring .sm { font-size: 11px; text-anchor: middle; fill: var(--mu); }
+.gmain { min-width: 0; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 16px; border-radius: 999px; font-size: 20px; font-weight: 700; color: var(--gc, var(--mu)); border: 2px solid var(--gc, var(--bd)); background: color-mix(in srgb, var(--gc, var(--mu)) 12%, var(--sf)); }
+.gmain p { margin: 6px 0 0; font-size: 14px; color: var(--mu); }
+.gmain p b { color: var(--tx); }
+.ladder { position: relative; margin: 14px 4px 40px 0; height: 8px; background: var(--sf2); border-radius: 4px; border: 1px solid var(--bd); }
+.ladder i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: var(--gc, var(--ac)); }
+.ladder u { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--tx); opacity: .55; text-decoration: none; }
+.ladder u:nth-child(odd) span { top: 28px; }
+.ladder u:nth-child(odd)::after { content: ''; position: absolute; left: 0; top: 100%; height: 13px; border-left: 1px dotted var(--mu); }
+.ladder u span { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); font-size: 11px; color: var(--mu); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.stat { background: var(--sf2); border: 1px solid var(--bd); border-radius: 8px; padding: 4px 9px; min-width: 0; }
+.stat small { display: block; color: var(--mu); font-size: 11.5px; white-space: nowrap; }
+.stat b { font-size: 15px; font-variant-numeric: tabular-nums; }
+.stat.w b { color: var(--warn); }
+.bars { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 4px 22px; }
+.br { display: grid; grid-template-columns: 5.6em 1fr 4.6em; gap: 8px; align-items: center; font-size: 13px; }
+.br span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar { height: 8px; background: var(--sf2); border-radius: 4px; overflow: hidden; border: 1px solid var(--bd); }
+.bar b { display: block; height: 100%; background: var(--base); transition: width .25s; }
+.bar.bn b { background: var(--bonus); }
+.br em { font-style: normal; text-align: right; color: var(--mu); font-variant-numeric: tabular-nums; }
+.chips { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chip { border: 1px solid color-mix(in srgb, var(--c) 55%, var(--bd)); border-radius: 999px; padding: 3px 12px; background: var(--sf); color: var(--mu); font-size: 13px; }
+.chip.ok { background: color-mix(in srgb, var(--c) 14%, var(--sf)); color: var(--tx); }
+.chip.cur { background: color-mix(in srgb, var(--c) 24%, var(--sf)); color: var(--tx); font-weight: 700; border: 2px solid var(--c); padding: 2px 11px; }
+.chip em { font-style: normal; margin-left: 8px; padding: 0 8px; border-radius: 999px; background: var(--c); color: #fff; font-size: 12px; }
+.chip small { margin-left: 5px; }
+.chips .hint { color: var(--mu); font-size: 12.5px; margin-left: auto; }
+
+/* ---------- 工具列 ---------- */
+#tb { display: flex; gap: 6px; padding: 7px 16px; border-top: 1px solid var(--bd); background: var(--bg); overflow-x: auto; align-items: center; }
+#tb .bt { font-size: 13px; padding: 4px 10px; flex: 0 0 auto; }
+.mini { display: none; margin-left: auto; font-weight: 600; font-size: 13px; white-space: nowrap; padding-left: 8px; }
+.mini .tag { color: var(--gc, var(--mu)); }
+.folded .mini { display: inline; }
+
+/* ---------- 內容 ---------- */
+main { max-width: 1000px; margin: 0 auto; padding: 14px 16px 30px; display: grid; gap: 10px; }
+.card { background: var(--sf); border: 1px solid var(--bd); border-radius: 10px; box-shadow: 0 1px 2px rgba(20, 32, 51, .06); overflow: hidden; }
+.card:has(.cb) > .ch { background: var(--sf2); border-bottom: 1px solid var(--bd); }
+.cb { padding-top: 4px; }
+.ch { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 9px 12px; }
+.ib { border: 0; background: none; font-weight: 700; font-size: 17px; padding: 2px 0; text-align: left; display: flex; align-items: center; gap: 6px; }
+.ib .ar { color: var(--mu); width: 1.1em; }
+.tagb { font-size: 12px; font-weight: 600; padding: 0 8px; border-radius: 999px; background: color-mix(in srgb, var(--bonus) 16%, var(--sf)); color: var(--bonus); border: 1px solid color-mix(in srgb, var(--bonus) 50%, var(--bd)); }
+.isc { font-variant-numeric: tabular-nums; font-weight: 600; }
+.imeta { color: var(--mu); font-size: 12.5px; }
+.ch .grow { flex: 1 1 120px; min-width: 80px; }
+.basic { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.basic input { width: 16px; height: 16px; accent-color: var(--ac); }
+.basic.na { color: var(--mu); }
+.cb { padding: 0 12px 10px; }
+.gh { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 18px; margin-bottom: 4px; padding: 8px 12px; background: var(--hd); color: var(--hdt); border-radius: 8px; font-size: 15px; letter-spacing: .02em; }
+.gh:first-child { margin-top: 6px; }
+.gh b { font-weight: 700; }
+.gh span { color: var(--hdt); opacity: .9; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.it { display: grid; grid-template-columns: 3.6em minmax(0, 1fr) auto; gap: 4px 10px; padding: 9px 4px; border-bottom: 1px solid var(--bd); align-items: start; }
+.it:last-child { border-bottom: 0; }
+.it.napp { opacity: .75; }
+.id { color: var(--mu); font-size: 13px; font-variant-numeric: tabular-nums; padding-top: 2px; }
+.txb { border: 0; background: none; text-align: left; padding: 0; font-size: 14px; width: 100%; }
+.txb .t { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.txb.op .t { display: block; }
+.st { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.badge { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; padding: 0 8px; border-radius: 999px; border: 1px solid var(--bd); color: var(--mu); background: var(--sf2); white-space: nowrap; }
+.badge.ok { color: var(--ok); background: var(--oks); border-color: color-mix(in srgb, var(--ok) 40%, var(--bd)); }
+.badge.zero { color: var(--bad); background: var(--bads); border-color: color-mix(in srgb, var(--bad) 40%, var(--bd)); }
+.badge.pend { color: var(--warn); background: var(--warns); border-color: color-mix(in srgb, var(--warn) 45%, var(--bd)); }
+.badge.cap { color: var(--ac); background: var(--acs); }
+.det { margin-top: 6px; padding: 8px 10px; border-left: 3px solid var(--bd); background: var(--sf2); border-radius: 0 6px 6px 0; font-size: 13px; color: var(--mu); }
+.det p { margin: 0 0 6px; }
+.det p:last-child { margin: 0; }
+.det b { color: var(--tx); }
+.det ul { margin: 4px 0 6px 1.2em; padding: 0; }
+.det .wn { color: var(--warn); }
+.pl { display: flex; flex-wrap: wrap; gap: 6px 10px; justify-content: flex-end; max-width: 360px; }
+.pg { display: inline-flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+.p { min-width: 2.9em; padding: 3px 9px; border: 1px solid var(--bd); border-radius: 999px; background: var(--sf); font-size: 13px; font-variant-numeric: tabular-nums; }
+@media (hover: hover) { .p:hover { background: var(--sf2); } }
+.p[aria-pressed="true"] { background: var(--ac); border-color: var(--ac); color: var(--ont); font-weight: 600; }
+.step { display: inline-flex; align-items: center; border: 1px solid var(--bd); border-radius: 999px; overflow: hidden; background: var(--sf); }
+.step button { border: 0; background: transparent; width: 28px; height: 26px; font-size: 16px; line-height: 1; }
+.step button:disabled { opacity: .35; cursor: default; }
+.step output { min-width: 3.4em; text-align: center; font-size: 13px; font-variant-numeric: tabular-nums; padding: 0 4px; }
+.step.on { border-color: var(--ac); }
+.na-box { margin: 8px 0 0; font-size: 13px; color: var(--mu); }
+.na-box summary { cursor: pointer; }
+.na-box li { margin: 2px 0; }
+.rst { border: 0; background: none; color: var(--mu); font-size: 12px; text-decoration: underline; padding: 0 2px; }
+
+/* ---------- 建議面板 ---------- */
+.advice { background: var(--sf); border: 1px solid var(--ac); border-radius: 8px; padding: 12px 14px; }
+.advice h2 { font-size: 16px; margin: 0 0 6px; }
+.advice .sum { font-size: 14px; margin: 0 0 8px; }
+.advice .note { font-size: 12.5px; color: var(--mu); margin: 6px 0 10px; }
+.advice ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.advice li { border: 1px solid var(--bd); border-radius: 6px; padding: 8px 10px; background: var(--sf2); }
+.advice li .hd { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
+.advice li .gain { font-weight: 700; color: var(--ok); }
+.advice li p { margin: 4px 0 0; font-size: 13px; color: var(--mu); }
+.advice li .cv { color: var(--warn); }
+.advice .acts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+/* ---------- 對話框與提示 ---------- */
+dialog { border: 1px solid var(--bd); border-radius: 10px; background: var(--sf); color: var(--tx); padding: 0; width: min(560px, calc(100vw - 24px)); max-height: calc(100vh - 32px); }
+dialog::backdrop { background: rgba(10, 18, 30, .5); }
+.dh { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--bd); }
+.dh h2 { margin: 0; font-size: 17px; }
+.db { padding: 14px 16px; overflow: auto; max-height: calc(100vh - 170px); font-size: 14px; }
+.db p { margin: 0 0 10px; }
+.db ul { margin: 0 0 10px; padding-left: 1.3em; }
+.db textarea { width: 100%; min-height: 150px; border: 1px solid var(--bd); border-radius: 6px; background: var(--sf2); padding: 8px; font: 12px/1.4 ui-monospace, Menlo, Consolas, monospace; }
+.db input[type="text"] { width: 100%; border: 1px solid var(--bd); border-radius: 6px; background: var(--sf); padding: 6px 9px; }
+.df { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--bd); }
+.plist { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 6px; }
+.plist li { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; border: 1px solid var(--bd); border-radius: 6px; padding: 6px 9px; }
+.plist li.cur { border-color: var(--ac); background: var(--acs); }
+.plist .nm { flex: 1 1 140px; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.plist small { color: var(--mu); }
+.warnb { background: var(--warns); border: 1px solid color-mix(in srgb, var(--warn) 40%, var(--bd)); border-radius: 6px; padding: 8px 10px; margin: 0 0 10px; color: var(--tx); font-size: 13px; }
+.errb { background: var(--bads); border: 1px solid color-mix(in srgb, var(--bad) 40%, var(--bd)); border-radius: 6px; padding: 8px 10px; margin: 0 0 10px; font-size: 13px; }
+#ts { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--tx); color: var(--bg); padding: 8px 14px; border-radius: 8px; font-size: 14px; z-index: 60; max-width: 92vw; display: none; align-items: center; gap: 12px; }
+#ts.show { display: flex; }
+#ts button { border: 1px solid currentColor; background: transparent; color: inherit; border-radius: 6px; padding: 1px 10px; }
+footer { max-width: 1000px; margin: 0 auto; padding: 0 16px 28px; color: var(--mu); font-size: 12.5px; }
+
+/* ---------- 列印版 ---------- */
+#report { display: none; }
+.rp h1 { font-size: 20px; margin: 0 0 4px; }
+.rp h2 { font-size: 15px; margin: 14px 0 6px; border-bottom: 1px solid #999; padding-bottom: 2px; }
+.rp table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.rp th, .rp td { border: 1px solid #aaa; padding: 3px 6px; text-align: left; vertical-align: top; }
+.rp td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rp .meta { font-size: 12px; margin: 0 0 8px; }
+.rp .dis { font-size: 11px; margin-top: 14px; }
+@media print {
+  body { background: #fff; color: #000; font-size: 12px; }
+  .stick, main, footer, dialog, #ts { display: none !important; }
+  #report { display: block; }
+  :root { color-scheme: light; }
+}
+
+/* ---------- 窄螢幕 ---------- */
+@media (max-width: 760px) {
+  #dash { grid-template-columns: 104px minmax(0, 1fr); }
+  .ring svg { width: 104px; height: 104px; }
+  .ring .big { font-size: 28px; }
+  .stats { grid-column: 1 / -1; }
+  .pill { font-size: 17px; padding: 3px 12px; }
+  .it { grid-template-columns: 3em minmax(0, 1fr); }
+  .pl { grid-column: 2; justify-content: flex-start; max-width: none; }
+  .pg { justify-content: flex-start; }
+  .mini { display: inline; }
+  .top h1 { font-size: 15px; }
+  .proj { max-width: 130px; }
+  .chips .hint { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+.ver { font-size: 13px; font-weight: 600; color: var(--ac); border: 1px solid var(--ac); border-radius: 8px; padding: 4px 10px; white-space: nowrap; }
+
+/* 專家建議組合清單 */
+.advice h3 small { font-weight: 400; color: var(--mu); }
+.pset { list-style: none; margin: 4px 0 12px; padding: 0; }
+.pset li { display: grid; grid-template-columns: 56px 1fr auto auto; gap: 8px; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--bd); font-size: 14px; }
+.pset .num { font-variant-numeric: tabular-nums; }
+.pset .gain { font-weight: 600; white-space: nowrap; }
+@media (max-width: 760px) { .pset li { grid-template-columns: 48px 1fr auto; } .pset .badge { grid-column: 2 / 4; justify-self: start; } }
+
+/* 專家建議取分說明 */
+.whyl { margin: 3px 0 0; font-size: 13px; line-height: 1.5; color: var(--bad); }
+.whyl b { font-weight: 700; }
+.det .why { color: var(--bad); }
+
+/* 基本規定列（不計分）與計分項目的視覺區分：
+ * 基本規定＝琥珀色底＋粗左邊條＋實心標籤（門檻，必須符合）；計分項目＝白底＋藍色細左邊條（拿分）。 */
+.it { border-left: 4px solid var(--ac); padding-left: 10px; }
+.it.bs { background: var(--warns); border-left-color: var(--warn); border-bottom-color: color-mix(in srgb, var(--warn) 25%, transparent); }
+.it.bs .id { color: var(--warn); font-weight: 700; }
+.badge.bsb { color: var(--ont); background: var(--warn); border-color: var(--warn); font-weight: 700; }
+.it.bs .basic { font-size: 14px; font-weight: 700; color: var(--warn); padding: 4px 10px; border: 1.5px solid var(--warn); border-radius: 999px; background: var(--sf); }
+.it.bs .basic input { accent-color: var(--warn); }
+.gh + .it.bs { margin-top: 2px; }
+.it.bs + .it:not(.bs) { margin-top: 6px; }
+/* 版本註記與容積獎勵 */
+.vnote { max-width: 1000px; margin: 12px auto 0; padding: 0 16px; font-size: 13px; color: var(--tx); }
+.vnote p { margin: 0 0 6px; line-height: 1.6; }
+.vnote .mu { color: var(--mu); }
+.incd { background: var(--sf); border: 1px solid var(--bd); border-radius: 10px; padding: 8px 12px; }
+.incd summary { cursor: pointer; font-weight: 600; }
+.incd table { border-collapse: collapse; margin: 8px 0; width: 100%; }
+.incd th, .incd td { border: 1px solid var(--bd); padding: 4px 8px; text-align: center; font-size: 13px; }
+.incd th { background: var(--sf2); }
+.incd ul { margin: 6px 0 6px 18px; padding: 0; }
+.chip .inc { display: block; font-size: 11px; opacity: .85; }
+
+/* 版本說明：滑鼠移上才顯示，不佔版面 */
+.vwrap { position: relative; display: inline-block; }
+button.ver { background: transparent; cursor: help; font-family: inherit; }
+.vtip { display: none; position: absolute; top: 100%; left: 0; z-index: 60; width: min(360px, 86vw); padding-top: 8px; }
+.vwrap:hover .vtip, .vwrap:focus-within .vtip, .vwrap.open .vtip { display: block; }
+.vbox { display: block; background: var(--sf); color: var(--tx); border: 1px solid var(--bd); border-radius: 10px; padding: 10px 12px; font-size: 13px; line-height: 1.6; box-shadow: 0 8px 24px rgba(0,0,0,.18); }
+.vbox small { color: var(--mu); }
+
+/* 對應頁次／書圖名稱 */
+.evd { display: grid; grid-template-columns: 8em minmax(0, 1fr); gap: 8px; margin-top: 8px; }
+.evd label { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--mu); }
+.evd input { font-size: 13px; padding: 5px 8px; border: 1px solid var(--bd); border-radius: 6px; background: var(--sf); color: var(--tx); }
+@media (max-width: 560px) { .evd { grid-template-columns: 1fr; } }
+
+/* 審查提醒 */
+.badge.rvb { color: var(--ac); background: var(--acs); border-color: color-mix(in srgb, var(--ac) 40%, var(--bd)); }
+.rv { margin: 6px 0; padding: 6px 10px; border-left: 3px solid var(--ac); background: var(--acs); border-radius: 0 6px 6px 0; color: var(--tx); }
+.rv.dd { border-left-color: var(--hd); background: transparent; border: 1px dashed var(--bd); border-left: 3px solid var(--hd); }
+.rv small { color: var(--mu); margin-left: 6px; }
+.rv ul { margin: 4px 0 0; padding-left: 1.2em; }
+
+/* 案例對照（管理者） */
+.cs { color: var(--tx); }
+.tw { overflow: auto; max-height: 65vh; border: 1px solid var(--bd); border-radius: 8px; }
+.ct { border-collapse: collapse; width: 100%; font-size: 13px; }
+.ct th, .ct td { padding: 4px 8px; border-bottom: 1px solid var(--bd); text-align: left; }
+.ct th { position: sticky; top: 0; background: var(--hd); color: var(--hdt); z-index: 1; }
+.ct th small { display: block; font-weight: 400; opacity: .85; }
+.ct .n { text-align: center; font-variant-numeric: tabular-nums; }
+.ct .z { color: var(--mu); }
+.ct .got { font-weight: 700; }
+.ct .full { font-weight: 700; color: var(--ok); background: var(--oks); }
+.ct .ih td { background: var(--acs); font-weight: 700; }
+.db .mu { color: var(--mu); }
+dialog:has(.ct) { width: min(900px, calc(100vw - 24px)); }
+
+/* 1.1.2 勾選支援的系統 */
+.sysg { margin: 8px 0 2px; }
+.sysg > b { margin-right: 8px; }
+.sysc { color: var(--mu); font-size: 12px; }
+.sysl { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.ysb { border: 1px solid var(--bd); background: var(--sf2); color: var(--tx); border-radius: 999px; padding: 4px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+.ysb.on { background: var(--hd); border-color: var(--hd); color: var(--hdt); font-weight: 700; }
+.ysb:focus-visible { outline: 2px solid var(--ac); outline-offset: 2px; }
+.sysum { font-size: 13px; color: var(--mu); padding: 2px 8px; }
+.sysum.on { color: var(--tx); }
+.sysum b { margin-left: 4px; }
+
+/* 選項清單：條件文字＋分數，像單選／複選 */
+.opts { margin: 6px 0 2px; display: flex; flex-direction: column; gap: 3px; max-width: 760px; }
+.opt { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 6px 10px; border: 1px solid var(--bd); border-radius: 8px; background: var(--sf); color: var(--tx); font: inherit; font-size: 14px; cursor: pointer; }
+.opt:hover { background: var(--sf2); }
+.opt .ol { flex: 1; min-width: 0; line-height: 1.45; }
+.opt b { font-variant-numeric: tabular-nums; color: var(--mu); white-space: nowrap; }
+.opt i { flex: none; width: 16px; height: 16px; border: 2px solid var(--mu); background: transparent; }
+.opt i.rd { border-radius: 50%; }
+.opt i.ck { border-radius: 50%; }
+.opt.on { border-color: var(--ac); background: var(--acs); }
+.opt.on b { color: var(--tx); }
+.opt.on i { border-color: var(--ac); background: var(--ac); box-shadow: inset 0 0 0 3px var(--sf); }
+.opt:focus-visible { outline: 2px solid var(--ac); outline-offset: 2px; }
+.optc { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 4px 10px; border: 1px solid var(--bd); border-radius: 8px; background: var(--sf); font-size: 14px; }
+.optc .ol { flex: 1; min-width: 0; }
+@media (max-width: 480px) {
+  .opt { gap: 8px; padding: 6px 8px; font-size: 13.5px; }
+  .opt b { font-size: 13px; }
+}
+
+</style>
+</head>
+<body>
+<div class="stick" id="stick">
+  <div class="top">
+    <h1>智慧建築標章計分工具</h1>
+    <button class="bt proj" id="projBtn" data-act="projects" title="切換或管理專案">專案</button>
+    <span class="vwrap"><button class="ver" id="verBtn" type="button" aria-describedby="verTip" aria-expanded="false">2024 版</button><span class="vtip" id="verTip" role="tooltip"><span class="vbox"><b>適用版本</b>：本工具依《智慧建築評估手冊》<b>2024 年版</b>（2024 年 12 月 1 日起實施）。適用哪一版，以<b>建築執照申請日或評定申請日</b>為準；2016 版舊案請先向主管機關確認適用版本，本工具目前不提供 2016 版。<br><small>（依公開資料整理，請以內政部建築研究所公告為準）</small></span></span></span>
+    <span class="sp"></span>
+    <span class="savest" id="saveSt" role="status" aria-live="polite"></span>
+    <button class="bt" data-act="help" aria-label="使用說明">說明</button>
+    <button class="bt" data-act="theme" id="thm" aria-label="切換淺色／深色主題">🌙</button>
+  </div>
+  <div class="catrow" id="catRow" hidden><span class="lb">建築類別</span><div class="seg" id="catSeg" role="group" aria-label="建築類別"></div></div>
+  <section id="dash" aria-label="計分儀表板"></section>
+  <div id="tb" role="toolbar" aria-label="工具列"></div>
+</div>
+<aside id="vnote" class="vnote" aria-label="版本與獎勵說明"></aside>
+<div id="adviceHost" style="max-width:1000px;margin:0 auto;padding:12px 16px 0"></div>
+<main id="cards"></main>
+<footer id="foot"></footer>
+<dialog id="dlg" aria-labelledby="dlgT"></dialog>
+<dialog id="dlg2" aria-labelledby="dlg2T"></dialog>
+<div id="ts" role="status" aria-live="polite"></div>
+<section id="report" class="rp" aria-hidden="true"></section>
+
+<script>
+/* 自動產生：tools/build_rules.py。資料來源：內政部建築研究所《智慧建築評估手冊》2024 年版（113 年 1 月公告）。請勿直接手改，請改 OVERRIDES 後重新產生。 */
+(function (g) {
+  g.SBS_RULES = g.SBS_RULES || {};
+  g.SBS_RULES["2024"] = {
+ "version": "2024",
+ "label": "2024 版",
+ "maxTotal": 240,
+ "source": "內政部建築研究所《智慧建築評估手冊》2024 年版（113 年 1 月公告）",
+ "categories": null,
+ "grades": [
+  {
+   "name": "合格級",
+   "min": 60,
+   "basicOnly": false
+  },
+  {
+   "name": "銅級",
+   "min": 70
+  },
+  {
+   "name": "銀級",
+   "min": 100
+  },
+  {
+   "name": "黃金級",
+   "min": 130
+  },
+  {
+   "name": "鑽石級",
+   "min": 150
+  }
+ ],
+ "indicators": [
+  {
+   "id": "1",
+   "name": "基礎設施",
+   "hasBasic": true,
+   "basicNA": [],
+   "bonus": false,
+   "groups": [
+    {
+     "id": "1.1",
+     "name": "佈線規劃設計",
+     "cap": 16,
+     "items": [
+      {
+       "id": "1.1.2",
+       "text": "建築物內智慧化所需之資通訊網路水平佈線，支援不同系統需求（如：電力、空調、照明、衛生給排水、通風、電梯、消防系統、監視攝影、門禁管理、保全、對講、停車管理、緊急求救、智慧家庭自動化、無線網路、有線網路、網路電話交換機或多媒體播放等）。",
+       "rule": "採用光纖化架構設計，不同水平集中點或末端光纖設備再轉出RJ-45介面，供Cat6等線路接續，支援不同系統需求。2分：3項（含）以上。4分：6項（含）以上。6分：9項（含）以上。8分：12項（含）以上。採用銅纜架構，支援不同系統需求。2分：3項（含）以上。4分：6項（含）以上。",
+       "max": 8,
+       "controls": [
+        {
+         "type": "tier",
+         "options": [
+          {
+           "points": 2,
+           "label": "光纖架構：3 項（含）以上"
+          },
+          {
+           "points": 4,
+           "label": "光纖架構：6 項（含）以上"
+          },
+          {
+           "points": 6,
+           "label": "光纖架構：9 項（含）以上"
+          },
+          {
+           "points": 8,
+           "label": "光纖架構：12 項（含）以上"
+          },
+          {
+           "points": 2,
+           "label": "銅纜架構：3 項（含）以上"
+          },
+          {
+           "points": 4,
+           "label": "銅纜架構：6 項（含）以上"
+          }
+         ]
+        }
+       ],
+       "pdfPage": 25,
+       "ref": "表 1.5～1.10，手冊第 14 頁",
+       "status": "review",
+       "note": "手冊將「光纖化架構」與「銅纜架構」並列為兩種做法，本工具以單選處理（銅纜架構最高 4 分）。請對照手冊第 14 頁確認。"
+      },
+      {
+       "id": "1.1.3",
+       "text": "公眾行動通信涵蓋提供建物室內地上、地下各層及電梯內行動通訊。",
+       "rule": "2分：行動通信係指，行動裝置可收到公眾行動網路信號，並進行通話或資料傳輸。※無設置該空間者免評估。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 2,
+         "label": "行動通信係指，行動裝置可收到公眾行動網路信號，並進行通話或資料傳輸。※無設置該空間者免評估。"
+        }
+       ],
+       "pdfPage": 25,
+       "ref": "表 1.5～1.10，手冊第 14 頁",
+       "status": "verified",
+       "hints": [
+        "※無設置該空間者免評估。"
+       ]
+      },
+      {
+       "id": "1.1.4",
+       "text": "無線區域網路在適當公共空間或必要之工作區域，設置無線區域網路。",
+       "rule": "1分：在適當公共空間或必要之工作區域，設置無線區域網路連線服務，即可得分。",
+       "max": 1,
+       "controls": [
+        {
+         "type": "check",
+         "points": 1,
+         "label": "在適當公共空間或必要之工作區域，設置無線區域網路連線服務，即可得分。"
+        }
+       ],
+       "pdfPage": 26,
+       "ref": "表 1.5～1.10，手冊第 15 頁",
+       "status": "verified"
+      },
+      {
+       "id": "1.1.5",
+       "text": "無線物聯網網路蒐集建築物環境數據（如：空氣品質、溫度或濕度等）或維運管理等所需之資訊（如：設備用電資訊、運轉資訊或狀態資訊等），作為後續營運維護分析之用，可為自行架設或租用的服務。",
+       "rule": "2分：依使用者需求，設置無線物聯網網路，即可得分。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 2,
+         "label": "依使用者需求，設置無線物聯網網路，即可得分。"
+        }
+       ],
+       "pdfPage": 26,
+       "ref": "表 1.5～1.10，手冊第 15 頁",
+       "status": "verified"
+      },
+      {
+       "id": "1.1.6",
+       "text": "行動寬頻專用電信網路提供給人工智慧與物聯網等應用整合平台的專用網路，為能確保通訊品質與資訊安全，採專頻專網專用網路設計（如：5G專用網路）。",
+       "rule": "網路佈建模式1分：租用行動通信業者的網路切片組網服務。2分：設置或租用部分網路元件在建物內的混合式組網模式（如：5G基地台、用戶平面功能UPF：UserPlaneFunction）。3分：設置或租用獨立組網模式（如：5G端到端從核心網路至基地站）。",
+       "max": 3,
+       "controls": [
+        {
+         "type": "tier",
+         "options": [
+          {
+           "points": 1,
+           "label": "租用行動通信業者的網路切片組網服務。"
+          },
+          {
+           "points": 2,
+           "label": "設置或租用部分網路元件在建物內的混合式組網模式（如：5G基地台、用戶平面功能UPF：UserPlaneFunction）。"
+          },
+          {
+           "points": 3,
+           "label": "設置或租用獨立組網模式（如：5G端到端從核心網路至基地站）。"
+          }
+         ]
+        }
+       ],
+       "pdfPage": 27,
+       "ref": "表 1.5～1.10，手冊第 16 頁",
+       "status": "verified"
+      }
+     ]
+    },
+    {
+     "id": "1.2",
+     "name": "佈線維運管理",
+     "cap": 9,
+     "items": [
+      {
+       "id": "1.2.2",
+       "text": "佈線系統檢測計畫說明及竣工檢測報告應具備佈線系統檢測計畫說明、竣工檢測報告（正式標章階段）。",
+       "rule": "不同模式檢測計畫及報告1分：提出資訊佈線（含光纖）檢測計畫/竣工檢測報告。1分：提出無線網路佈線檢測計畫/竣工檢測報告。電纜需有傳輸特性測試（如：衰減量-分貝dB），光纜需有鏈結損失測試（分貝dB），無線網路需有無線訊號強度測試（分貝毫瓦dBm）。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 1,
+         "label": "提出資訊佈線（含光纖）檢測計畫/竣工檢測報告。"
+        },
+        {
+         "type": "check",
+         "points": 1,
+         "label": "提出無線網路佈線檢測計畫/竣工檢測報告。電纜需有傳輸特性測試（如：衰減量-分貝dB），光纜需有鏈結損失測試（分貝dB），無線網路需有無線訊號強度測試（分貝毫瓦dBm）。"
+        }
+       ],
+       "pdfPage": 28,
+       "ref": "表 1.5～1.10，手冊第 17 頁",
+       "status": "verified"
+      },
+      {
+       "id": "1.2.3",
+       "text": "佈線系統維運管理計畫佈線系統的維運與管理相對重要，需有清楚的管理計畫並能整合進入維運管理機制，將更能發揮綜效。此外，竣工後的佈線圖資亦需完整保存，若為數位檔案更可加入靜態建築數據庫儲存及查詢，亦或可整合於建築資訊模型（BIM）或3D可視化查詢。",
+       "rule": "提出佈線系統維運管理說明。1分：提出完整佈線維運管理計畫說明。2分：納入維運管理系統且可儲存與查詢。2分：佈線系統資料可於BIM或3D中可視化查詢。",
+       "max": 5,
+       "controls": [
+        {
+         "type": "check",
+         "points": 1,
+         "label": "提出完整佈線維運管理計畫說明"
+        },
+        {
+         "type": "check",
+         "points": 2,
+         "label": "納入維運管理系統且可儲存與查詢"
+        },
+        {
+         "type": "check",
+         "points": 2,
+         "label": "佈線系統資料可於 BIM 或 3D 中可視化查詢"
+        }
+       ],
+       "pdfPage": 28,
+       "ref": "表 1.5～1.10，手冊第 17 頁",
+       "status": "verified"
+      },
+      {
+       "id": "1.2.4",
+       "text": "設置電動車輛充電設備電能維運管理系統為有效落實電動車輛推動，擴大節能減排之效益，鼓勵建物提供安全、充裕、普及的充電設備及裝置，並導入電動車輛電能管理系統，以確保用電安全、後續擴充彈性及維運。",
+       "rule": "2分：停車空間導入電動車輛電能管理系統。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 2,
+         "label": "停車空間導入電動車輛電能管理系統。"
+        }
+       ],
+       "pdfPage": 29,
+       "ref": "表 1.5～1.10，手冊第 18 頁",
+       "status": "verified"
+      }
+     ]
+    },
+    {
+     "id": "1.3",
+     "name": "資料設施",
+     "cap": 17,
+     "items": [
+      {
+       "id": "1.3.2",
+       "text": "建築動態數據庫儲存、運算功能之建築數據庫將蒐集全生命週期的建築數據，其中動態數據可包含環境數據、行為數據或設備運轉數據，如：環境溫溼度、雨量、紫外線強度、人流、人數、行徑路線、電力、中央空調、照明、衛生給排水、送排風、電梯、消防系統、監視攝影、門禁管理、保全、對講、停車管理、緊急求救、影音對講、或緊急求救等。對所蒐集的數據需自行申告蒐集內容、方式、頻率及排程。另外，動態數據庫須具備資料介接、互通與交換，並採用標準資料格式。此外，數據庫的形式可以是本地端的資料庫儲存機制或是雲端數據庫形式皆可。",
+       "rule": "1分：儲存5種（含）以上的動態數據。2分：儲存8種（含）以上的動態數據。3分：儲存10種（含）以上的動態數據。依使用者需求自訂。",
+       "max": 3,
+       "controls": [
+        {
+         "type": "tier",
+         "options": [
+          {
+           "points": 1,
+           "label": "儲存5種（含）以上的動態數據。"
+          },
+          {
+           "points": 2,
+           "label": "儲存8種（含）以上的動態數據。"
+          },
+          {
+           "points": 3,
+           "label": "儲存10種（含）以上的動態數據。依使用者需求自訂。"
+          }
+         ]
+        }
+       ],
+       "pdfPage": 29,
+       "ref": "表 1.5～1.10，手冊第 18 頁",
+       "status": "verified"
+      },
+      {
+       "id": "1.3.3",
+       "text": "備援機制提出下列建築物自動備援機制的功能1.建築數據庫備援：在非同一棟建築物或同一棟建築不同系統或資料庫間的備援機制。2.網路備援：對內或對外具備雙環狀或雙路由或其他網路拓樸線路與網路設備具備援機制。3.系統備援：智慧建築管理系統具備熱備援與資料回溯功能。",
+       "rule": "1分：建築數據庫備援。2分：網路備援。3分：系統備援。不同項目給予不同鼓勵分數但最高不超過5分。",
+       "max": 5,
+       "controls": [
+        {
+         "type": "check",
+         "points": 1,
+         "label": "建築數據庫備援"
+        },
+        {
+         "type": "check",
+         "points": 2,
+         "label": "網路備援"
+        },
+        {
+         "type": "check",
+         "points": 3,
+         "label": "系統備援"
+        }
+       ],
+       "pdfPage": 30,
+       "ref": "表 1.5～1.10，手冊第 19 頁",
+       "status": "verified"
+      },
+      {
+       "id": "1.3.4",
+       "text": "資訊安全對網路、設備、使用者及資料系統需設置適當資訊安全機制，如：1.網路及網頁的資訊安全。2.應用系統之人機介面。3.身份認證及資料存取。4.資訊安全認證設備。5.資訊安全相關設備具軟體更新功能（如防毒軟體），以確保系統之最新防護力。",
+       "rule": "1分：設置對外網路防火牆、防毒軟體機制（如：網頁防護、防毒掃描或入侵偵測等）。1分：應用系統之人機介面需具備操作使用管理權限功能。1分：資料儲存加密機制。1分：雙因子的身份認證機制。1分：採用資安認證設備（如：台灣資通產業標準協會物聯網資安認證通過設備）。1分：資訊安全相關設備具有軟體更新功能（如：防毒軟體）。不同項目給予不同鼓勵分數但最高不超過5分。",
+       "max": 5,
+       "controls": [
+        {
+         "type": "check",
+         "points": 1,
+         "label": "設置對外網路防火牆、防毒軟體機制（如：網頁防護、防毒掃描或入侵偵測等）。"
+        },
+        {
+         "type": "check",
+         "points": 1,
+         "label": "應用系統之人機介面需具備操作使用管理權限功能。"
+        },
+        {
+         "type": "check",
+         "points": 1,
+         "label": "資料儲存加密機制。"
+        },
+        {
+         "type": "check",
+         "points": 1,
+         "label": "雙因子的身份認證機制。"
+        },
+        {
+         "type": "check",
+         "points": 1,
+         "label": "採用資安認證設備（如：台灣資通產業標準協會物聯網資安認證通過設備）。"
+        },
+        {
+         "type": "check",
+         "points": 1,
+         "label": "資訊安全相關設備具有軟體更新功能（如：防毒軟體）。不同項目給予不同鼓勵分數但最高不超過5分。"
+        }
+       ],
+       "pdfPage": 31,
+       "ref": "表 1.5～1.10，手冊第 20 頁",
+       "status": "verified"
+      },
+      {
+       "id": "1.3.5",
+       "text": "區塊鏈加密機制對具有不可竄改需求的建築數據庫資料，如：保全、門禁管理、緊急對講、監視攝影、主機登入紀錄等，採用區塊鏈加密方式儲存。",
+       "rule": "2分：儲存2項資料類別。4分：儲存3項（含）以上資料類別。",
+       "max": 4,
+       "controls": [
+        {
+         "type": "tier",
+         "options": [
+          {
+           "points": 2,
+           "label": "儲存2項資料類別。"
+          },
+          {
+           "points": 4,
+           "label": "儲存3項（含）以上資料類別。"
+          }
+         ]
+        }
+       ],
+       "pdfPage": 31,
+       "ref": "表 1.5～1.10，手冊第 20 頁",
+       "status": "verified"
+      }
+     ]
+    }
+   ],
+   "basics": [
+    {
+     "id": "1.1.1",
+     "text": "建築物內智慧化所需之資通訊網路垂直主幹佈線採用光纖化架構設計光纖具備未來擴充及配線空間優勢，應規劃為智慧建築之骨幹。",
+     "pdfPage": 25,
+     "ref": "表 1.5～1.10，手冊第 14 頁"
+    },
+    {
+     "id": "1.2.1",
+     "text": "佈線系統應具備標示與可識別機制為有利於後續維運與管理，提出佈線系統具標示與可識別機制或參考TIA-606、電子條碼等，提出標示與識別相關之設計及施作佐證說明。",
+     "pdfPage": 27,
+     "ref": "表 1.5～1.10，手冊第 16 頁"
+    },
+    {
+     "id": "1.3.1",
+     "text": "建築靜態數據庫建築數據庫將蒐集全生命週期的建築數據，其中靜態數據庫將收集規劃、設計與建造階段之所有靜態資料，如：BIM、電腦輔助設計（CAD）或專案管理資訊系統（PMIS）等圖資數據。此外，數據庫的形式可以是本地端的資料庫儲存機制或是雲端數據庫形式皆可。",
+     "pdfPage": 29,
+     "ref": "表 1.5～1.10，手冊第 18 頁"
+    }
+   ]
+  },
+  {
+   "id": "2",
+   "name": "維運管理",
+   "hasBasic": true,
+   "basicNA": [],
+   "bonus": false,
+   "groups": [
+    {
+     "id": "2.1",
+     "name": "智慧化規劃設計",
+     "cap": 15,
+     "items": [
+      {
+       "id": "2.1.2",
+       "text": "智慧化系統需求與設計根據建築智慧化規劃設計內容，提供跨系統整合之智慧化具體互動關聯性作為（含需求說明、系統流程圖和互動關聯性內容）。※住宿類建築室內空間之互動關聯性作為，須具備CNS16014認證之家庭閘道器。",
+       "rule": "2分：具1項跨系統整合之智慧化具體互動關聯性作為。4分：具2項跨系統整合之智慧化具體互動關聯性作為。6分：具3項跨系統整合之智慧化具體互動關聯性作為。",
+       "max": 6,
+       "controls": [
+        {
+         "type": "tier",
+         "options": [
+          {
+           "points": 2,
+           "label": "具1項跨系統整合之智慧化具體互動關聯性作為。"
+          },
+          {
+           "points": 4,
+           "label": "具2項跨系統整合之智慧化具體互動關聯性作為。"
+          },
+          {
+           "points": 6,
+           "label": "具3項跨系統整合之智慧化具體互動關聯性作為。"
+          }
+         ]
+        }
+       ],
+       "pdfPage": 33,
+       "ref": "表 1.5～1.10，手冊第 22 頁",
+       "status": "verified"
+      },
+      {
+       "id": "2.1.3",
+       "text": "平台管理計畫1.智慧建築管理平台須具備運轉資訊異常預警通知功能（如：CPU執行率過高、記憶體使用量過高或硬碟剩餘空間數過低等）。2.資訊傳輸是日後平台穩定性重要因素，因此平台須具備網路資訊異常警示及通知功能。",
+       "rule": "1分：具運轉資訊異常預警通知功能。1分：具網路資訊異常警示通知功能。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 1,
+         "label": "具運轉資訊異常預警通知功能。"
+        },
+        {
+         "type": "check",
+         "points": 1,
+         "label": "具網路資訊異常警示通知功能。"
+        }
+       ],
+       "pdfPage": 33,
+       "ref": "表 1.5～1.10，手冊第 22 頁",
+       "status": "verified"
+      },
+      {
+       "id": "2.1.5",
+       "text": "維運管理計畫1.符合2.1.4使用管理計畫內容的網頁(WEB)化維運管理系統。2.為確保智慧建築各項智慧化系統設施設備功能保持正常運轉。須提供智慧化設施設備5年維護計畫和網頁（WEB）化作業管理系統。3.根據智慧化設施設備可能異常條件下，訂定危機處理與緊急應變計畫。",
+       "rule": "3分：具網頁（WEB）化維運管理系統且符合2.1.4功能。2分：具5年智慧化系統設施設備修繕計畫和網頁（WEB）化維運管理系統。2分：具危機處理與緊急應變計畫。",
+       "max": 7,
+       "controls": [
+        {
+         "type": "check",
+         "points": 3,
+         "label": "具網頁（WEB）化維運管理系統且符合2.1.4功能。"
+        },
+        {
+         "type": "check",
+         "points": 2,
+         "label": "具5年智慧化系統設施設備修繕計畫和網頁（WEB）化維運管理系統。"
+        },
+        {
+         "type": "check",
+         "points": 2,
+         "label": "具危機處理與緊急應變計畫。"
+        }
+       ],
+       "pdfPage": 35,
+       "ref": "表 1.5～1.10，手冊第 24 頁",
+       "status": "verified"
+      }
+     ]
+    },
+    {
+     "id": "2.2",
+     "name": "智慧工地管理",
+     "cap": 10,
+     "items": [
+      {
+       "id": "2.2.1",
+       "text": "工地安全管理運用智慧化系統或技術（如：防墜落偵測感應、工地煙火偵測或開挖觀測即時回報等），提出管理計畫及成果紀錄，以提升工地安全。",
+       "rule": "2分：具備1項智慧工地之安全管理功能。4分：具備2項以上智慧工地之安全管理功能。",
+       "max": 4,
+       "controls": [
+        {
+         "type": "tier",
+         "options": [
+          {
+           "points": 2,
+           "label": "具備1項智慧工地之安全管理功能。"
+          },
+          {
+           "points": 4,
+           "label": "具備2項以上智慧工地之安全管理功能。"
+          }
+         ]
+        }
+       ],
+       "pdfPage": 36,
+       "ref": "表 1.5～1.10，手冊第 25 頁",
+       "status": "verified"
+      },
+      {
+       "id": "2.2.2",
+       "text": "工地人員管理運用智慧化系統或技術（如：實名制管理、定位追蹤等），提出管理計畫及成果紀錄，以縮短作業工時或減少出工數提升工地作業效率。",
+       "rule": "2分：具備1項智慧工地之人員管理功能。4分：具備2項以上智慧工地之人員管理功能。",
+       "max": 4,
+       "controls": [
+        {
+         "type": "tier",
+         "options": [
+          {
+           "points": 2,
+           "label": "具備1項智慧工地之人員管理功能。"
+          },
+          {
+           "points": 4,
+           "label": "具備2項以上智慧工地之人員管理功能。"
+          }
+         ]
+        }
+       ],
+       "pdfPage": 36,
+       "ref": "表 1.5～1.10，手冊第 25 頁",
+       "status": "verified"
+      },
+      {
+       "id": "2.2.3",
+       "text": "工地資材管理運用智慧化系統或技術（如：資材庫存管理、物料追蹤管理等），提出管理計畫及成果紀錄，以有效管理工地資材。",
+       "rule": "2分：具備1項智慧工地之資材管理功能。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 2,
+         "label": "具備1項智慧工地之資材管理功能。"
+        }
+       ],
+       "pdfPage": 36,
+       "ref": "表 1.5～1.10，手冊第 25 頁",
+       "status": "verified"
+      }
+     ]
+    },
+    {
+     "id": "2.3",
+     "name": "營運維護",
+     "cap": 13,
+     "items": [
+      {
+       "id": "2.3.3",
+       "text": "行動化管理智慧建築管理平台整合維運管理功能（如：狀態資訊顯示、歷史資訊查閱、緊急事故主動通報功能、設備遠端操作控制、郵務通知領取、訪客預約登記、權限控制或設備報修等功能）於行動裝置應用程式上提供管理者能即時掌握相關資訊。",
+       "rule": "2分：符合5項以上功能。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 2,
+         "label": "符合5項以上功能。"
+        }
+       ],
+       "pdfPage": 38,
+       "ref": "表 1.5～1.10，手冊第 27 頁",
+       "status": "verified"
+      },
+      {
+       "id": "2.3.4",
+       "text": "建築資訊模型（BIM）整合為達到建築生命週期管理，於交付管理階段進行建築資訊模型（BIM）與管理系統資訊接軌整合。",
+       "rule": "1分：智慧建築管理平台具備建築資訊模型（BIM）整合功能。3分：可呈現建築資訊模型（BIM）視覺化瀏覽並提供即時設備資訊顯示功能。5分：可呈現建築資訊模型（BIM）視覺化瀏覽並提供即時設備資訊顯示和遠端控制功能。",
+       "max": 5,
+       "controls": [
+        {
+         "type": "tier",
+         "options": [
+          {
+           "points": 1,
+           "label": "智慧建築管理平台具備建築資訊模型（BIM）整合功能。"
+          },
+          {
+           "points": 3,
+           "label": "可呈現建築資訊模型（BIM）視覺化瀏覽並提供即時設備資訊顯示功能。"
+          },
+          {
+           "points": 5,
+           "label": "可呈現建築資訊模型（BIM）視覺化瀏覽並提供即時設備資訊顯示和遠端控制功能。"
+          }
+         ]
+        }
+       ],
+       "pdfPage": 38,
+       "ref": "表 1.5～1.10，手冊第 27 頁",
+       "status": "verified"
+      },
+      {
+       "id": "2.3.5",
+       "text": "營運數據應用建構設施設備數據驅動運轉模式（如：電梯數據應用維護服務、感測器數據應用故障預測、冰水主機數據應用異常分析、水位數據應用抽水泵運轉預測、高壓變壓器、發電機、消防泵等故障異常分析）。",
+       "rule": "2分：具備一項營運數據後端分析與推估預測功能。4分：具備兩項營運數據後端分析與推估預測功能。6分：具備三項營運數據後端分析與推估預測功能。",
+       "max": 6,
+       "controls": [
+        {
+         "type": "tier",
+         "options": [
+          {
+           "points": 2,
+           "label": "具備一項營運數據後端分析與推估預測功能。"
+          },
+          {
+           "points": 4,
+           "label": "具備兩項營運數據後端分析與推估預測功能。"
+          },
+          {
+           "points": 6,
+           "label": "具備三項營運數據後端分析與推估預測功能。"
+          }
+         ]
+        }
+       ],
+       "pdfPage": 39,
+       "ref": "表 1.5～1.10，手冊第 28 頁",
+       "status": "verified"
+      }
+     ]
+    }
+   ],
+   "basics": [
+    {
+     "id": "2.1.1",
+     "text": "建築智慧化規劃設計以智慧建築需求、服務目的進行智慧化系統規劃設計。",
+     "pdfPage": 33,
+     "ref": "表 1.5～1.10，手冊第 22 頁"
+    },
+    {
+     "id": "2.1.4",
+     "text": "使用管理計畫根據使用者需求和維護營運角度進行規劃，對日後服務定位、內容和維護進行使用管理規劃。1.資產管理：對建築物固定資產的管理方式，應提供其相關管理辦法。2.設備管理：訂定智慧化設施設備(含感測器)的維護保養方式，提供其相關管理規範、管理維護周期及計畫。3.效能管理：訂定智慧化設施管理績效評估標準，包括績效評估項目、績效目標及評估方式等。",
+     "pdfPage": 34,
+     "ref": "表 1.5～1.10，手冊第 23 頁"
+    },
+    {
+     "id": "2.3.1",
+     "text": "智慧建築監控智慧建築管理平台需包含以下功能：1.具備網頁（WEB）化操作功能。2.依智慧化需求整合子系統，達到資訊採集或遠端操控。3.具安全或緊急事故主動通報功能。並提供：記錄、聲音告警和即時影像連動跳圖等功能。4.具備連動控制和運轉紀錄功能。5.具備趨勢圖形且至少包括日、月、年曲線圖。6.具備國際標準協定，提供整合連結。",
+     "pdfPage": 37,
+     "ref": "表 1.5～1.10，手冊第 26 頁"
+    },
+    {
+     "id": "2.3.2",
+     "text": "建築維運管理為達到維持大樓穩定運轉的目標，建築物須具備以下標準維運管理操作功能。1.具備網頁（WEB）化操作功能。2.具備設備之故障紀錄功能並供使用者進行查詢。3.具備財務、資產、郵務或訪客等物業管理功能。4.產製管理報表。",
+     "pdfPage": 38,
+     "ref": "表 1.5～1.10，手冊第 27 頁"
+    }
+   ]
+  },
+  {
+   "id": "3",
+   "name": "安全防災",
+   "hasBasic": true,
+   "basicNA": [],
+   "bonus": false,
+   "groups": [
+    {
+     "id": "3.1",
+     "name": "環境安全",
+     "cap": 30,
+     "items": [
+      {
+       "id": "3.1.1.3",
+       "text": "對於長時間使用的用電設備或充電裝置（如：汽車、機車充電電力線路或長時間用電設備等）具有用電異常偵測功能，並將訊號整合至智慧建築管理平台。",
+       "rule": "用電異常訊號整合至智慧建築管理系統",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 2,
+         "label": ""
+        }
+       ],
+       "pdfPage": 41,
+       "ref": "表 1.5～1.10，手冊第 30 頁",
+       "status": "verified"
+      },
+      {
+       "id": "3.1.1.4",
+       "text": "系統具備火警感知功能，長時間監測紀錄室內溫度數據，並依據室內溫度記錄判斷異常，達到火警告警功能。",
+       "rule": "依據室內溫度記錄判斷異常，達到火警告警功能。",
+       "max": 3,
+       "controls": [
+        {
+         "type": "check",
+         "points": 3,
+         "label": ""
+        }
+       ],
+       "pdfPage": 41,
+       "ref": "表 1.5～1.10，手冊第 30 頁",
+       "status": "verified"
+      },
+      {
+       "id": "3.1.1.5",
+       "text": "具備偵知漏水功能（如：設置漏水感測器等），整合至智慧建築管理平台。",
+       "rule": "漏水偵知訊號，整合至智慧建築管理平台。",
+       "max": 1,
+       "controls": [
+        {
+         "type": "check",
+         "points": 1,
+         "label": ""
+        }
+       ],
+       "pdfPage": 41,
+       "ref": "表 1.5～1.10，手冊第 30 頁",
+       "status": "verified"
+      },
+      {
+       "id": "3.1.1.6",
+       "text": "具備地震偵知功能（如：設置地震感測器），整合至智慧建築管理平台。",
+       "rule": "地震偵知訊號整合至智慧建築管理平台。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 2,
+         "label": ""
+        }
+       ],
+       "pdfPage": 41,
+       "ref": "表 1.5～1.10，手冊第 30 頁",
+       "status": "verified"
+      },
+      {
+       "id": "3.1.2.1",
+       "text": "於公共空間之顯示裝置上，提供災害告警訊息（如：火警、水災、地震或用電異常等）。※住宿類需包含專用空間之語音對講或顯示裝置。",
+       "rule": "1分：可顯示1種災害。2分：可顯示2種災害。3分：可顯示3種災害。4分：可顯示4種災害。",
+       "max": 4,
+       "controls": [
+        {
+         "type": "tier",
+         "options": [
+          {
+           "points": 1,
+           "label": "可顯示1種災害。"
+          },
+          {
+           "points": 2,
+           "label": "可顯示2種災害。"
+          },
+          {
+           "points": 3,
+           "label": "可顯示3種災害。"
+          },
+          {
+           "points": 4,
+           "label": "可顯示4種災害。"
+          }
+         ]
+        }
+       ],
+       "pdfPage": 42,
+       "ref": "表 1.5～1.10，手冊第 31 頁",
+       "status": "verified"
+      },
+      {
+       "id": "3.1.2.2",
+       "text": "於公共空間顯示連動設備（如：昇降機、門禁、排風機、空調、防水設備或自動斷電等）之狀態訊息。",
+       "rule": "1分：可顯示2種連動設備狀態訊息。2分：可顯示3種連動設備狀態訊息。3分：可顯示4種連動設備狀態訊息。4分：可顯示5種連動設備狀態訊息。",
+       "max": 4,
+       "controls": [
+        {
+         "type": "tier",
+         "options": [
+          {
+           "points": 1,
+           "label": "可顯示2種連動設備狀態訊息。"
+          },
+          {
+           "points": 2,
+           "label": "可顯示3種連動設備狀態訊息。"
+          },
+          {
+           "points": 3,
+           "label": "可顯示4種連動設備狀態訊息。"
+          },
+          {
+           "points": 4,
+           "label": "可顯示5種連動設備狀態訊息。"
+          }
+         ]
+        }
+       ],
+       "pdfPage": 42,
+       "ref": "表 1.5～1.10，手冊第 31 頁",
+       "status": "verified"
+      },
+      {
+       "id": "3.1.3.2",
+       "text": "消防系統需與空調及地下室送排風設備整合連動",
+       "rule": "消防系統與空調及地下室送排風設備整合連動。",
+       "max": 1,
+       "controls": [
+        {
+         "type": "check",
+         "points": 1,
+         "label": ""
+        }
+       ],
+       "pdfPage": 43,
+       "ref": "表 1.5～1.10，手冊第 32 頁",
+       "status": "verified"
+      },
+      {
+       "id": "3.1.3.3",
+       "text": "系統具備用電異常自動斷電功能（如：汽車充電電力線路、機車充電電力線路或常時用電設備等），並將訊號整合至智慧建築管理平台。",
+       "rule": "具備用電異常自動斷電功能，且能將訊號整合至智慧建築管理平台。",
+       "max": 3,
+       "controls": [
+        {
+         "type": "check",
+         "points": 3,
+         "label": ""
+        }
+       ],
+       "pdfPage": 43,
+       "ref": "表 1.5～1.10，手冊第 32 頁",
+       "status": "verified"
+      },
+      {
+       "id": "3.1.3.4",
+       "text": "火災發生後系統具備自動並即時有效引導人員避難之功能（如：具閃滅型避難方向指示燈、聲響型避難方向指示燈或動態避難引導設備等）。",
+       "rule": "系統整合火警感知器可判別火警位置，以閃滅或聲響型避難方向指示燈引導人員避難之功能。",
+       "max": 3,
+       "controls": [
+        {
+         "type": "check",
+         "points": 3,
+         "label": ""
+        }
+       ],
+       "pdfPage": 44,
+       "ref": "表 1.5～1.10，手冊第 33 頁",
+       "status": "verified"
+      },
+      {
+       "id": "3.1.3.5",
+       "text": "建築物內重要空間（如：防災中心、管理室、重要機房或其他空間等），於火災預警或警報發生時，系統具備連動監視器顯示現場影像之功能。",
+       "rule": "火災預警或警報發生時，系統可連動監視器顯示現場影像。",
+       "max": 3,
+       "controls": [
+        {
+         "type": "check",
+         "points": 3,
+         "label": ""
+        }
+       ],
+       "pdfPage": 44,
+       "ref": "表 1.5～1.10，手冊第 33 頁",
+       "status": "verified"
+      },
+      {
+       "id": "3.1.3.6",
+       "text": "漏水災害發生時，系統具備連動監視器顯示現場影像之功能。",
+       "rule": "漏水偵知可連動監視器顯示現場影像。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 2,
+         "label": ""
+        }
+       ],
+       "pdfPage": 45,
+       "ref": "表 1.5～1.10，手冊第 34 頁",
+       "status": "verified"
+      },
+      {
+       "id": "3.1.3.7",
+       "text": "系統具備依地震震度連動解除門禁管制設備之功能。",
+       "rule": "地震偵知可連動解除門禁。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 2,
+         "label": ""
+        }
+       ],
+       "pdfPage": 45,
+       "ref": "表 1.5～1.10，手冊第 34 頁",
+       "status": "verified"
+      }
+     ]
+    },
+    {
+     "id": "3.2",
+     "name": "人身安全",
+     "cap": 10,
+     "items": [
+      {
+       "id": "3.2.1.2",
+       "text": "公共空間語音對講裝置整合行動通訊服務，提供雙向通話功能。※住宿類需包含專有空間之語音對講或顯示裝置整合行動通訊服務。",
+       "rule": "語音對講裝置整合行動通訊服務。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 2,
+         "label": ""
+        }
+       ],
+       "pdfPage": 46,
+       "ref": "表 1.5～1.10，手冊第 35 頁",
+       "status": "verified"
+      },
+      {
+       "id": "3.2.1.7",
+       "text": "因應使用者需求，提升安全防範辨識能力，（如：人流管制、人員辨識、防疫控管）或其他安全管理設備，於智慧建築管理平台運算及分析。",
+       "rule": "安全防範具備辨識、運算及分析功能。",
+       "max": 3,
+       "controls": [
+        {
+         "type": "check",
+         "points": 3,
+         "label": ""
+        }
+       ],
+       "pdfPage": 48,
+       "ref": "表 1.5～1.10，手冊第 37 頁",
+       "status": "verified"
+      },
+      {
+       "id": "3.2.2.2",
+       "text": "防盜入侵警報於行動通訊裝置提供告警訊息。",
+       "rule": "於行動通訊裝置顯示防盜告警訊息。",
+       "max": 1,
+       "controls": [
+        {
+         "type": "check",
+         "points": 1,
+         "label": ""
+        }
+       ],
+       "pdfPage": 49,
+       "ref": "表 1.5～1.10，手冊第 38 頁",
+       "status": "verified"
+      },
+      {
+       "id": "3.2.3.2",
+       "text": "重要空間或主要周遭環境具備防盜警報功能，與影像及環境周遭設備（如：照明、廣播、聲光警報或其他）整合連動，以達到嚇阻及記錄功能。",
+       "rule": "防盜警報整合影像及環境周遭設備，達到嚇阻及記錄功能。",
+       "max": 3,
+       "controls": [
+        {
+         "type": "check",
+         "points": 3,
+         "label": ""
+        }
+       ],
+       "pdfPage": 49,
+       "ref": "表 1.5～1.10，手冊第 38 頁",
+       "status": "verified"
+      },
+      {
+       "id": "3.2.4.2",
+       "text": "排除有害氣體具備排除或阻斷有害氣體之功能。",
+       "rule": "具備有害氣體排除或阻斷之功能。",
+       "max": 1,
+       "controls": [
+        {
+         "type": "check",
+         "points": 1,
+         "label": ""
+        }
+       ],
+       "pdfPage": 50,
+       "ref": "表 1.5～1.10，手冊第 39 頁",
+       "status": "verified"
+      }
+     ]
+    }
+   ],
+   "basics": [
+    {
+     "id": "3.1.1.1",
+     "text": "火警偵知系統具備火警感知功能，且至少提供樓層火警可靠的監測數據和警報資訊，並納入智慧建築管理平台。",
+     "pdfPage": 40,
+     "ref": "表 1.5～1.10，手冊第 29 頁"
+    },
+    {
+     "id": "3.1.1.2",
+     "text": "防火區劃之安全梯常閉式防火門狀態偵知系統能監視防火區劃之安全梯常閉式防火門之啟閉狀態。",
+     "pdfPage": 40,
+     "ref": "表 1.5～1.10，手冊第 29 頁"
+    },
+    {
+     "id": "3.1.3.1",
+     "text": "消防連動門禁及昇降機消防火警系統觸發時，需連動解除主要逃生動線上之門禁管制設備，昇降機降至避難層。",
+     "pdfPage": 43,
+     "ref": "表 1.5～1.10，手冊第 32 頁"
+    },
+    {
+     "id": "3.2.1.1",
+     "text": "提供即時語音服務公共空間提供即時語音服務之功能，（如：語音對講裝置、影音對講裝置或其他等）。",
+     "pdfPage": 46,
+     "ref": "表 1.5～1.10，手冊第 35 頁"
+    },
+    {
+     "id": "3.2.1.3",
+     "text": "門禁出入安全管制空間安全防護需於主要出入口、重要空間（如：防災中心、管理室、重要機房或其他空間等），具備門禁管制功能。",
+     "pdfPage": 46,
+     "ref": "表 1.5～1.10，手冊第 35 頁"
+    },
+    {
+     "id": "3.2.1.4",
+     "text": "車輛出入安全管制停車空間應具備車輛進出管制及辨識功能，若為機械式停車空間，需將昇降機設備使用狀態與故障訊號納入管理系統。※若無室內停車空間則免檢討。",
+     "pdfPage": 47,
+     "ref": "表 1.5～1.10，手冊第 36 頁"
+    },
+    {
+     "id": "3.2.1.5",
+     "text": "影像安全防護與紀錄系統依據建築物安全維護設計之需要，規劃影像監視系統並錄影紀錄。",
+     "pdfPage": 47,
+     "ref": "表 1.5～1.10，手冊第 36 頁"
+    },
+    {
+     "id": "3.2.1.6",
+     "text": "防盜入侵主動告警主要出入口及重要空間，具備防盜入侵警報功能，並將訊號整合至智慧建築管理平台顯示防盜告警訊息並紀錄。※住宿類需包含專有空間，並將訊號整合至戶內之語音對講或顯示裝置。",
+     "pdfPage": 47,
+     "ref": "表 1.5～1.10，手冊第 36 頁"
+    },
+    {
+     "id": "3.2.2.1",
+     "text": "顯示緊急求救位置建築物屋頂平台、安全梯、室內外停車場、無障礙車位等，具備緊急求救或對外聯繫之功能，並顯示求救訊號之樓層及位置於智慧建築管理平台。※住宿類需包含專用空間，並將緊急求救訊號整合至智慧建築管理平台及戶內之語音對講或顯示裝置。",
+     "pdfPage": 48,
+     "ref": "表 1.5～1.10，手冊第 37 頁"
+    },
+    {
+     "id": "3.2.3.1",
+     "text": "緊急求救連動即時影像屋頂平台、室內外停車場、無障礙車位應具備緊急求救與影像整合連動功能。※若無停車空間則免檢討。",
+     "pdfPage": 49,
+     "ref": "表 1.5～1.10，手冊第 38 頁"
+    },
+    {
+     "id": "3.2.4.1",
+     "text": "有害氣體偵知避免因有害氣體造成災害危及生命安全，（如：設置瓦斯、一氧化碳或其他有害氣體感測器），並將訊號整合至智慧建築管理平台。※若無設置瓦斯則免檢討。",
+     "pdfPage": 50,
+     "ref": "表 1.5～1.10，手冊第 39 頁"
+    }
+   ]
+  },
+  {
+   "id": "4",
+   "name": "節能管理",
+   "hasBasic": true,
+   "basicNA": [],
+   "bonus": false,
+   "groups": [
+    {
+     "id": "4.1",
+     "name": "設備效率",
+     "cap": 5,
+     "items": [
+      {
+       "id": "4.1.1",
+       "text": "空調設備效率採用優於經濟部能源局公告之能源效率標準的冰水主機及無風管空氣調節機。",
+       "rule": "1分：採用能源效率分級2級以上的冰水機及無風管空氣調節機。2分：採用能源效率分級1級的冰水機及無風管空氣調節機。※住宿類：僅評估公共空間之空調設備。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "tier",
+         "options": [
+          {
+           "points": 1,
+           "label": "採用能源效率分級2級以上的冰水機及無風管空氣調節機。"
+          },
+          {
+           "points": 2,
+           "label": "採用能源效率分級1級的冰水機及無風管空氣調節機。※住宿類：僅評估公共空間之空調設備。"
+          }
+         ]
+        }
+       ],
+       "pdfPage": 51,
+       "ref": "表 1.5～1.10，手冊第 40 頁",
+       "status": "verified",
+       "hints": [
+        "※住宿類：僅評估公共空間之空調設備。"
+       ]
+      },
+      {
+       "id": "4.1.3",
+       "text": "動力設備效率採用符合中華民國能源效率管理系統之高效率動力設備。動力設備包含但不限於下列設備：1.空調輸送設備（如：冰水泵、冷卻水泵、空調箱等）。2.給排水設備。3.生活熱水設備。4.停車場排風設備。5.排氣設備。6.昇降機。7.其他。",
+       "rule": "1分：高效率動力設備之採用率達50%以上。採用率依動力設備總功率計算。2分：高效率動力設備配有變頻器且採用率達50%以上，採用率依動力設備總功率計算。※住宿類：僅評估公共空間之動力設備。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "tier",
+         "options": [
+          {
+           "points": 1,
+           "label": "高效率動力設備之採用率達50%以上。採用率依動力設備總功率計算。"
+          },
+          {
+           "points": 2,
+           "label": "高效率動力設備配有變頻器且採用率達50%以上，採用率依動力設備總功率計算。※住宿類：僅評估公共空間之動力設備。"
+          }
+         ]
+        }
+       ],
+       "pdfPage": 51,
+       "ref": "表 1.5～1.10，手冊第 40 頁",
+       "status": "verified",
+       "hints": [
+        "※住宿類：僅評估公共空間之動力設備。"
+       ]
+      },
+      {
+       "id": "4.1.4",
+       "text": "線路設備效率調降空調、動力設備之電源幹線及其分路電壓降，使其兩者合計不超過百分之三，使線路設備端電壓更接近於設備銘牌額定電壓，提昇設備運轉效率及降低線路運轉壽命電能損失。",
+       "rule": "1分：經查確實設置者即可得分。※住宿類：僅評估公設空間之空調、動力設備之電源幹線（分路）等線路。",
+       "max": 1,
+       "controls": [
+        {
+         "type": "check",
+         "points": 1,
+         "label": "經查確實設置者即可得分。※住宿類：僅評估公設空間之空調、動力設備之電源幹線（分路）等線路。"
+        }
+       ],
+       "pdfPage": 52,
+       "ref": "表 1.5～1.10，手冊第 41 頁",
+       "status": "verified",
+       "hints": [
+        "※住宿類：僅評估公設空間之空調、動力設備之電源幹線（分路）等線路。"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "4.2",
+     "name": "節能技術",
+     "cap": 22,
+     "items": [
+      {
+       "id": "4.2.1",
+       "text": "建築外層智慧化節能建築外層智慧化節能（如：建築外層可以自動調整之外遮陽、窗戶、窗簾等降低室內耗能或採追日型、建築整合太陽光電（BIPV）創能措施）。",
+       "rule": "依不同外層節能技術給分1分：具智慧遮陽功能。1分：具智慧開口調節功能。1分：採用BIPV或追日型創能措施。※住宿類：僅評估公共空間之開窗或外牆或屋頂區域之建築外層。",
+       "max": 3,
+       "controls": [
+        {
+         "type": "check",
+         "points": 1,
+         "label": "具智慧遮陽功能。"
+        },
+        {
+         "type": "check",
+         "points": 1,
+         "label": "具智慧開口調節功能。"
+        },
+        {
+         "type": "check",
+         "points": 1,
+         "label": "採用BIPV或追日型創能措施。※住宿類：僅評估公共空間之開窗或外牆或屋頂區域之建築外層。"
+        }
+       ],
+       "pdfPage": 52,
+       "ref": "表 1.5～1.10，手冊第 41 頁",
+       "status": "verified",
+       "hints": [
+        "※住宿類：僅評估公共空間之開窗或外牆或屋頂區域之建築外層。"
+       ]
+      },
+      {
+       "id": "4.2.2",
+       "text": "空調系統智慧化節能空調系統依節能技術積分表累加節能積分值，可採計多項技術，最多可得4分。採用率應達50%以上，未達50%者，積分值採半計算（參見表2.7空調節能技術積分表）。",
+       "rule": "1分：節能積分值合計達30以上。2分：節能積分值合計達35以上。3分：節能積分值合計達40以上。4分：節能積分值合計達45以上。※住宿類：僅評估公共空間之空調設備。",
+       "max": 4,
+       "controls": [
+        {
+         "type": "tier",
+         "options": [
+          {
+           "points": 1,
+           "label": "節能積分值合計達30以上。"
+          },
+          {
+           "points": 2,
+           "label": "節能積分值合計達35以上。"
+          },
+          {
+           "points": 3,
+           "label": "節能積分值合計達40以上。"
+          },
+          {
+           "points": 4,
+           "label": "節能積分值合計達45以上。※住宿類：僅評估公共空間之空調設備。"
+          }
+         ]
+        }
+       ],
+       "pdfPage": 53,
+       "ref": "表 1.5～1.10，手冊第 42 頁",
+       "status": "verified",
+       "hints": [
+        "※住宿類：僅評估公共空間之空調設備。"
+       ]
+      },
+      {
+       "id": "4.2.3",
+       "text": "照明與插座智慧化節能照明及插座採智慧化控制以達節能效益。照明技術如：採用晝光利用、時程控制、人員感知控制、情境模式控制、調光控制或ICT雲端應用管理等技術。插座技術如：時程控制或ICT雲端應用管理等技術。",
+       "rule": "每項智慧化控制技術可得1分，最高4分。申請智慧照明控制之工作場域，占同類型場域總樓地板面積之20%以上（如：臨窗外周區、工作區等）或特定場域（如：停車場、樓梯間、會議室、廁所、茶水間等）之空間全面採用智慧照明控制技術。插座電源排程控制或採智慧化插座。1分：插座具智慧化控制技術，數量占總插座數的20%者。2分：插座具智慧化控制技術，數量占總插座數的40%者。插座依實設總數量計算。※住宿類：僅評估公共空間之設備插座。",
+       "max": 6,
+       "controls": [
+        {
+         "type": "count",
+         "unit": 1,
+         "max": 4,
+         "label": "智慧化控制技術（每項 1 分，最高 4 分）"
+        },
+        {
+         "type": "tier",
+         "options": [
+          {
+           "points": 1,
+           "label": "插座具智慧化控制，數量占總插座數 20%"
+          },
+          {
+           "points": 2,
+           "label": "插座具智慧化控制，數量占總插座數 40%"
+          }
+         ]
+        }
+       ],
+       "pdfPage": 53,
+       "ref": "表 1.5～1.10，手冊第 42 頁",
+       "status": "verified",
+       "hints": [
+        "※住宿類：僅評估公共空間之設備插座。"
+       ]
+      },
+      {
+       "id": "4.2.4",
+       "text": "動力設施智慧化節能動力設施智慧化節能（如：泵、排風扇、電梯及熱泵等動力設施，具有偵知單元及連動控制可達節能效益）。動力設施包含：1.給排水設施（如：依需量時程、預測控制設施）。2.生活熱水設施（如：依外氣溫度控制熱水溫度或流量）。3.停車場排風設施（如：依車流感測或CO偵測控制排風設施）。4.排氣設施（如：依空氣品質偵測控制排氣設施）。5.昇降機（如：採用電能回收系統等）。6.其他。",
+       "rule": "1分：具有偵知及主動控制技術之動力設施功率占總動力設施額定功率之20%以上。2分：具有偵知及主動控制技術之動力設施功率占總動力設施額定功率之30%以上。3分：具有偵知及主動控制技術之動力設施功率占總動力設施額定功率之40%以上。4分：具有偵知及主動控制技術之動力設施功率占總動力設施額定功率之50%以上。※住宿類：僅評估公共空間之動力設施。",
+       "max": 4,
+       "controls": [
+        {
+         "type": "tier",
+         "options": [
+          {
+           "points": 1,
+           "label": "具有偵知及主動控制技術之動力設施功率占總動力設施額定功率之20%以上。"
+          },
+          {
+           "points": 2,
+           "label": "具有偵知及主動控制技術之動力設施功率占總動力設施額定功率之30%以上。"
+          },
+          {
+           "points": 3,
+           "label": "具有偵知及主動控制技術之動力設施功率占總動力設施額定功率之40%以上。"
+          },
+          {
+           "points": 4,
+           "label": "具有偵知及主動控制技術之動力設施功率占總動力設施額定功率之50%以上。※住宿類：僅評估公共空間之動力設施。"
+          }
+         ]
+        }
+       ],
+       "pdfPage": 54,
+       "ref": "表 1.5～1.10，手冊第 43 頁",
+       "status": "verified",
+       "hints": [
+        "※住宿類：僅評估公共空間之動力設施。"
+       ]
+      },
+      {
+       "id": "4.2.6",
+       "text": "水資源流向監測與管理繪製大樓水資源平衡圖，包含但不限於下列系統：供水：1.自來水。2.雨水回收。3.冷凝水回收4.一般用水（中水回收）。5.生活雜排水（汙水回收）。用水：1.空調冷卻水。2.生活用水。3.浴廁用水。4.景觀用水。※無設置者免標示。依據水平衡圖，設置建築水資源用水量偵測與資訊顯示。",
+       "rule": "1分：除自來水外，至少於空調冷凝水回收或雨水回收設置智慧水表，並將用水流向資訊，視覺化顯示於智慧建築管理平台。1分：於景觀用水或中央空調補水設置智慧水表，並將用水流向資訊即時視覺化顯示於智慧建築管理平台。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 1,
+         "label": "除自來水外，至少於空調冷凝水回收或雨水回收設置智慧水表，並將用水流向資訊，視覺化顯示於智慧建築管理平台。"
+        },
+        {
+         "type": "check",
+         "points": 1,
+         "label": "於景觀用水或中央空調補水設置智慧水表，並將用水流向資訊即時視覺化顯示於智慧建築管理平台。"
+        }
+       ],
+       "pdfPage": 55,
+       "ref": "表 1.5～1.10，手冊第 44 頁",
+       "status": "verified"
+      },
+      {
+       "id": "4.2.7",
+       "text": "綠能技術產生電力等替代能源（如：設置太陽光電、風力發電或小水力發電等綠電系統），並具備產生電力之監視或搭配儲能做控制。",
+       "rule": "1分：總裝置容量4瓩以上。2分：總裝置容量16瓩以上。3分：總裝置容量32瓩以上。",
+       "max": 3,
+       "controls": [
+        {
+         "type": "tier",
+         "options": [
+          {
+           "points": 1,
+           "label": "總裝置容量4瓩以上。"
+          },
+          {
+           "points": 2,
+           "label": "總裝置容量16瓩以上。"
+          },
+          {
+           "points": 3,
+           "label": "總裝置容量32瓩以上。"
+          }
+         ]
+        }
+       ],
+       "pdfPage": 56,
+       "ref": "表 1.5～1.10，手冊第 45 頁",
+       "status": "verified"
+      }
+     ]
+    },
+    {
+     "id": "4.3",
+     "name": "能源管理",
+     "cap": 18,
+     "items": [
+      {
+       "id": "4.3.2",
+       "text": "空調效能持續監測與紀錄1.空調冰水系統偵知冰水溫差並記錄運轉偏差率，提高運轉效能。2.空調冷卻水系統偵知趨近溫度並記錄運轉偏差率，提高運轉效能。3.氣冷式主機偵知入風溫度並記錄運轉偏差率，提高運轉效能。",
+       "rule": "每項技術可得1分。※運轉偏差率=（設計值-實際運轉值）/設計值。運轉偏差率應小於40%。※住宿類僅評估公共空間之空調設備。",
+       "max": 3,
+       "controls": [
+        {
+         "type": "count",
+         "unit": 1,
+         "max": 3,
+         "label": "空調效能監測項目（每項技術 1 分）"
+        }
+       ],
+       "pdfPage": 57,
+       "ref": "表 1.5～1.10，手冊第 46 頁",
+       "status": "verified",
+       "hints": [
+        "※運轉偏差率=（設計值-實際運轉值）/設計值。",
+        "※住宿類僅評估公共空間之空調設備。"
+       ]
+      },
+      {
+       "id": "4.3.3",
+       "text": "智慧需量控制能源管理系統可依用電需量，即時進行用電設備卸載、儲能或創能控制，以達電力能源管理之功效。",
+       "rule": "1分：能源管理系統可依用電需量，即時進行用電設施卸載、再生能源或儲能設施管理以達智慧需量控制之功能。1分：導入人工智慧之機器學習或深度學習等技術，輔助節能、儲能、創能等管理策略以達用電需量控制目標。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 1,
+         "label": "能源管理系統可依用電需量，即時進行用電設施卸載、再生能源或儲能設施管理以達智慧需量控制之功能。"
+        },
+        {
+         "type": "check",
+         "points": 1,
+         "label": "導入人工智慧之機器學習或深度學習等技術，輔助節能、儲能、創能等管理策略以達用電需量控制目標。"
+        }
+       ],
+       "pdfPage": 57,
+       "ref": "表 1.5～1.10，手冊第 46 頁",
+       "status": "verified"
+      },
+      {
+       "id": "4.3.4",
+       "text": "用電資訊視覺化顯示具備將建築分項用電即時視覺化顯示與紀錄於智慧建築管理平台，建築分項用電包含但不限於：1.插座用電。2.昇降設備用電。3.給排水用電。4.停車場用電。5.廚房與生活熱水設備用電。",
+       "rule": "每具備二項用電資訊顯示可得1分，最高3分。各項採用率需達80%以上（分項用電量可用分盤累計或總盤記錄）。※採用率=分項納入監測之用電量÷分項設計總用電量",
+       "max": 3,
+       "controls": [
+        {
+         "type": "count",
+         "unit": 1,
+         "max": 3,
+         "label": "用電資訊顯示得分（每具備二項得 1 分，最高 3 分）"
+        }
+       ],
+       "pdfPage": 58,
+       "ref": "表 1.5～1.10，手冊第 47 頁",
+       "status": "verified",
+       "hints": [
+        "※採用率=分項納入監測之用電量÷分項設計總用電量"
+       ]
+      },
+      {
+       "id": "4.3.5",
+       "text": "智慧用電管理藉由模擬或人工智慧（AI）技術（如：神經網路、機器學習、深度學習等），將空調、照明、給排水、昇降機、建築外層、停車場等設施設備用電數據，整合感知參數與連動結果進行用電效能分析預測，以供管理者決策參考。",
+       "rule": "3分：整合2項以上用電設施設備。6分：整合4項以上用電設施設備。8分：整合6項以上用電設施設備。",
+       "max": 8,
+       "controls": [
+        {
+         "type": "tier",
+         "options": [
+          {
+           "points": 3,
+           "label": "整合2項以上用電設施設備。"
+          },
+          {
+           "points": 6,
+           "label": "整合4項以上用電設施設備。"
+          },
+          {
+           "points": 8,
+           "label": "整合6項以上用電設施設備。"
+          }
+         ]
+        }
+       ],
+       "pdfPage": 59,
+       "ref": "表 1.5～1.10，手冊第 48 頁",
+       "status": "verified"
+      },
+      {
+       "id": "4.3.6",
+       "text": "能源流向有效管理依據能源績效指標規劃建築空間或組織能源分攤機制，有效管理能源流向。",
+       "rule": "1分：依據能源績效指標進行建築空間或組織規劃能源分攤機制，有效管理能源流向。1分：能源績效指標連續紀錄、分析追蹤與外部稽核或查證。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 1,
+         "label": "依據能源績效指標進行建築空間或組織規劃能源分攤機制，有效管理能源流向。"
+        },
+        {
+         "type": "check",
+         "points": 1,
+         "label": "能源績效指標連續紀錄、分析追蹤與外部稽核或查證。"
+        }
+       ],
+       "pdfPage": 59,
+       "ref": "表 1.5～1.10，手冊第 48 頁",
+       "status": "verified"
+      }
+     ]
+    }
+   ],
+   "basics": [
+    {
+     "id": "4.1.2",
+     "text": "照明設備效率採用符合節能標章之光源及燈具。具有節能標章認證之燈具採用率達60%以上（含地下室），採用率依全棟建物總用燈具計算。※LED燈具得以符合節能標章能源效率基準計之。※一般住宅計算範圍不含專用空間。※醫療、實驗室等場所燈具用途特殊空間，免評估該空間。",
+     "pdfPage": 51,
+     "ref": "表 1.5～1.10，手冊第 40 頁"
+    },
+    {
+     "id": "4.2.5",
+     "text": "水資源資訊揭露為有效管理建築水資源，應設置智慧水表於總表可連續偵知自來水用量並將用水量資訊即時視覺化顯示於智慧建築管理平台。",
+     "pdfPage": 55,
+     "ref": "表 1.5～1.10，手冊第 44 頁"
+    },
+    {
+     "id": "4.3.1",
+     "text": "能源視覺化監視具備將建築總用電、空調、照明、動力用電及建築總用水量即時視覺化顯示於智慧建築管理平台顯示值至少含電壓、電流、實（虛）功率、功因及累積瓩時（kWh）、自來水用量等。",
+     "pdfPage": 56,
+     "ref": "表 1.5～1.10，手冊第 45 頁"
+    }
+   ]
+  },
+  {
+   "id": "5",
+   "name": "健康舒適",
+   "hasBasic": true,
+   "basicNA": [],
+   "bonus": false,
+   "groups": [
+    {
+     "id": "5.1",
+     "name": "環境健康",
+     "cap": 20,
+     "items": [
+      {
+       "id": "5.1.1.2",
+       "text": "空氣品質、光環境、水環境或室外環境等狀態偵知",
+       "rule": "除具有熱環境感測設施（如：溫度感測、濕度感測等），及二氧化碳濃度設施外，另具備其他環境狀態偵知功能者，每項可得1分。1分：偵知居室（如：辦公或會議等空間）空氣品質環境，設置室內空氣品質環境感測設施（如：細懸浮微粒PM2.5、總揮發性有機物TVOC感測等）。1分：偵知居室（如：辦公或會議等空間）光環境，設置光環境感測設施（如：照度感測等）。1分：偵知水環境，設置水質感測設施（如：酸鹼值PH值、懸浮微粒或含菌量感測等）。1分：偵知室外環境（如：溫度、濕度、雨量等）。",
+       "max": 4,
+       "controls": [
+        {
+         "type": "check",
+         "points": 1,
+         "label": "偵知居室（如：辦公或會議等空間）空氣品質環境，設置室內空氣品質環境感測設施（如：細懸浮微粒PM2.5、總揮發性有機物TVOC感測等）。"
+        },
+        {
+         "type": "check",
+         "points": 1,
+         "label": "偵知居室（如：辦公或會議等空間）光環境，設置光環境感測設施（如：照度感測等）。"
+        },
+        {
+         "type": "check",
+         "points": 1,
+         "label": "偵知水環境，設置水質感測設施（如：酸鹼值PH值、懸浮微粒或含菌量感測等）。"
+        },
+        {
+         "type": "check",
+         "points": 1,
+         "label": "偵知室外環境（如：溫度、濕度、雨量等）。"
+        }
+       ],
+       "pdfPage": 62,
+       "ref": "表 1.5～1.10，手冊第 51 頁",
+       "status": "verified"
+      },
+      {
+       "id": "5.1.2.1",
+       "text": "具備溫熱環境資訊顯示功能。",
+       "rule": "3分：顯示溫熱環境偵測資訊，以顯示器或APP方式揭露予使用者，並納入智慧建築管理平台，提供資訊紀錄、查詢、分析及主動異常提醒之功能。",
+       "max": 3,
+       "controls": [
+        {
+         "type": "check",
+         "points": 3,
+         "label": "顯示溫熱環境偵測資訊，以顯示器或APP方式揭露予使用者，並納入智慧建築管理平台，提供資訊紀錄、查詢、分析及主動異常提醒之功能。"
+        }
+       ],
+       "pdfPage": 63,
+       "ref": "表 1.5～1.10，手冊第 52 頁",
+       "status": "verified"
+      },
+      {
+       "id": "5.1.2.2",
+       "text": "具備空氣品質環境資訊顯示功能。",
+       "rule": "3分：顯示空氣品質環境偵測資訊，以顯示器或APP方式揭露予使用者，並納入智慧建築管理平台，並提供資訊紀錄、查詢、分析及主動異常提醒之功能。",
+       "max": 3,
+       "controls": [
+        {
+         "type": "check",
+         "points": 3,
+         "label": "顯示空氣品質環境偵測資訊，以顯示器或APP方式揭露予使用者，並納入智慧建築管理平台，並提供資訊紀錄、查詢、分析及主動異常提醒之功能。"
+        }
+       ],
+       "pdfPage": 63,
+       "ref": "表 1.5～1.10，手冊第 52 頁",
+       "status": "verified"
+      },
+      {
+       "id": "5.1.2.3",
+       "text": "具備光環境資訊顯示功能。",
+       "rule": "3分：顯示光環境偵測資訊，以顯示器或APP方式揭露予使用者，並納入智慧建築管理平台，並提供資訊紀錄、查詢、分析及主動異常提醒之功能。",
+       "max": 3,
+       "controls": [
+        {
+         "type": "check",
+         "points": 3,
+         "label": "顯示光環境偵測資訊，以顯示器或APP方式揭露予使用者，並納入智慧建築管理平台，並提供資訊紀錄、查詢、分析及主動異常提醒之功能。"
+        }
+       ],
+       "pdfPage": 64,
+       "ref": "表 1.5～1.10，手冊第 53 頁",
+       "status": "verified"
+      },
+      {
+       "id": "5.1.2.4",
+       "text": "具備水環境資訊顯示功能。",
+       "rule": "3分：顯示水環境偵測資訊（如：水箱水質偵測），納入智慧建築管理平台，並提供資訊紀錄、查詢、分析及主動異常提醒之功能。",
+       "max": 3,
+       "controls": [
+        {
+         "type": "check",
+         "points": 3,
+         "label": "顯示水環境偵測資訊（如：水箱水質偵測），納入智慧建築管理平台，並提供資訊紀錄、查詢、分析及主動異常提醒之功能。"
+        }
+       ],
+       "pdfPage": 64,
+       "ref": "表 1.5～1.10，手冊第 53 頁",
+       "status": "verified"
+      },
+      {
+       "id": "5.1.3.1",
+       "text": "溫熱環境控制或空氣調節、空氣品質環境控制等設施連動控制",
+       "rule": "2分：依據環境感測結果，連動溫熱環境控制設施（如：外氣引入或空氣調節等設施）、空氣品質環境控制設施（如：外氣引入或空氣調節等設施）。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 2,
+         "label": "依據環境感測結果，連動溫熱環境控制設施（如：外氣引入或空氣調節等設施）、空氣品質環境控制設施（如：外氣引入或空氣調節等設施）。"
+        }
+       ],
+       "pdfPage": 65,
+       "ref": "表 1.5～1.10，手冊第 54 頁",
+       "status": "verified"
+      },
+      {
+       "id": "5.1.3.2",
+       "text": "光環境控制設施連動控制",
+       "rule": "2分：依據環境感測結果，連動光環境控制設施（如：導入自然光或照明調節等設施）。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 2,
+         "label": "依據環境感測結果，連動光環境控制設施（如：導入自然光或照明調節等設施）。"
+        }
+       ],
+       "pdfPage": 65,
+       "ref": "表 1.5～1.10，手冊第 54 頁",
+       "status": "verified"
+      }
+     ]
+    },
+    {
+     "id": "5.2",
+     "name": "健康管理",
+     "cap": 11,
+     "items": [
+      {
+       "id": "5.2.1.1",
+       "text": "提供具監測資訊傳輸、紀錄、查詢或主動異常提醒等功能之生理監測設施",
+       "rule": "2分：提供具備（如：體溫、血壓、血氧等生理監測偵測設施，鼓勵採用具有衛生福利部醫療器材許可證之產品）監測資訊傳輸、紀錄、查詢或主動異常提醒等功能之生理監測設施。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 2,
+         "label": "提供具備（如：體溫、血壓、血氧等生理監測偵測設施，鼓勵採用具有衛生福利部醫療器材許可證之產品）監測資訊傳輸、紀錄、查詢或主動異常提醒等功能之生理監測設施。"
+        }
+       ],
+       "pdfPage": 66,
+       "ref": "表 1.5～1.10，手冊第 55 頁",
+       "status": "verified"
+      },
+      {
+       "id": "5.2.1.2",
+       "text": "提供具監測資訊傳輸、紀錄、查詢或主動異常提醒等功能之健康促進設施",
+       "rule": "2分：提供具備（如：心肺運動、阻抗或重訓運動等健康促進設施）監測資訊傳輸、紀錄、查詢或主動異常提醒等功能之健康促進設施。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 2,
+         "label": "提供具備（如：心肺運動、阻抗或重訓運動等健康促進設施）監測資訊傳輸、紀錄、查詢或主動異常提醒等功能之健康促進設施。"
+        }
+       ],
+       "pdfPage": 66,
+       "ref": "表 1.5～1.10，手冊第 55 頁",
+       "status": "verified"
+      },
+      {
+       "id": "5.2.1.3",
+       "text": "提供降低病毒入侵風險之設施",
+       "rule": "2分：提供降低病毒入侵風險之設施（如：體溫偵測、口罩配戴辨識或具滅菌功能之通道或換氣等管制病毒入侵設施），且具主動偵測、顯示、警示、連動功能。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 2,
+         "label": "提供降低病毒入侵風險之設施（如：體溫偵測、口罩配戴辨識或具滅菌功能之通道或換氣等管制病毒入侵設施），且具主動偵測、顯示、警示、連動功能。"
+        }
+       ],
+       "pdfPage": 67,
+       "ref": "表 1.5～1.10，手冊第 56 頁",
+       "status": "verified"
+      },
+      {
+       "id": "5.2.1.4",
+       "text": "設置非接觸性設備，降低接觸感染風險",
+       "rule": "1分：設置非接觸性設備（如：聲控設備、掃描辨識服務等），降低接觸感染風險。",
+       "max": 1,
+       "controls": [
+        {
+         "type": "check",
+         "points": 1,
+         "label": "設置非接觸性設備（如：聲控設備、掃描辨識服務等），降低接觸感染風險。"
+        }
+       ],
+       "pdfPage": 67,
+       "ref": "表 1.5～1.10，手冊第 56 頁",
+       "status": "verified"
+      },
+      {
+       "id": "5.2.1.5",
+       "text": "提供可有效促進使用者自我保護之智慧化措施",
+       "rule": "2分：提供可有效促進使用者自我保護之智慧化措施（如：水流感測器確保洗手時間充足、共用物品主動消毒功能、室內使用者密度管制系統等）。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 2,
+         "label": "提供可有效促進使用者自我保護之智慧化措施（如：水流感測器確保洗手時間充足、共用物品主動消毒功能、室內使用者密度管制系統等）。"
+        }
+       ],
+       "pdfPage": 68,
+       "ref": "表 1.5～1.10，手冊第 57 頁",
+       "status": "verified"
+      },
+      {
+       "id": "5.2.2.1",
+       "text": "設置照護服務設施設備或系統平台",
+       "rule": "1分：設置照護服務設施設備或系統平台，提供主動照護資訊。",
+       "max": 1,
+       "controls": [
+        {
+         "type": "check",
+         "points": 1,
+         "label": "設置照護服務設施設備或系統平台，提供主動照護資訊。"
+        }
+       ],
+       "pdfPage": 69,
+       "ref": "表 1.5～1.10，手冊第 58 頁",
+       "status": "verified"
+      },
+      {
+       "id": "5.2.2.2",
+       "text": "設置遠距照護服務系統",
+       "rule": "1分：提供智慧化遠距照護服務，設置遠距照護服務系統。",
+       "max": 1,
+       "controls": [
+        {
+         "type": "check",
+         "points": 1,
+         "label": "提供智慧化遠距照護服務，設置遠距照護服務系統。"
+        }
+       ],
+       "pdfPage": 69,
+       "ref": "表 1.5～1.10，手冊第 58 頁",
+       "status": "verified"
+      }
+     ]
+    },
+    {
+     "id": "5.3",
+     "name": "便利生活",
+     "cap": 8,
+     "items": [
+      {
+       "id": "5.3.1.1",
+       "text": "提供使用者貼心便利之服務",
+       "rule": "2分：提供使用者貼心便利之服務，具備「便利生活」之整合性應用服務平台或APP，協助使用者方便快速的生活資訊等服務（如：線上學習、公共空間預約、社區活動報名、叫車、外送服務、生活服務派遣或社區團購等）。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 2,
+         "label": "提供使用者貼心便利之服務，具備「便利生活」之整合性應用服務平台或APP，協助使用者方便快速的生活資訊等服務（如：線上學習、公共空間預約、社區活動報名、叫車、外送服務、生活服務派遣或社區團購等）。"
+        }
+       ],
+       "pdfPage": 70,
+       "ref": "表 1.5～1.10，手冊第 59 頁",
+       "status": "verified"
+      },
+      {
+       "id": "5.3.1.2",
+       "text": "提供個人化提醒服務",
+       "rule": "2分：提供個人化提醒服務，（如：住戶個別繳費提醒、個別郵件提取狀態、個人用藥提醒、停車充電服務提醒等）。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "judged",
+         "max": 2,
+         "label": "提供個人化提醒服務（手冊 2 分；可能部分給分）"
+        }
+       ],
+       "pdfPage": 70,
+       "ref": "表 1.5～1.10，手冊第 59 頁",
+       "status": "review",
+       "note": "手冊條文為「2分」，未說明部分符合時如何給分。參考表（專家取分）對「僅提供部分提醒服務」取 1 分，實際得分須由評定小組認定。"
+      },
+      {
+       "id": "5.3.2.1",
+       "text": "提供「便利生活」之共用空間",
+       "rule": "2分：提供具智慧化管理機制的「便利生活」之共用空間（如：自行車停放處與淋浴更衣室、雨衣雨具放置空間、農場、花園等）。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 2,
+         "label": "提供具智慧化管理機制的「便利生活」之共用空間（如：自行車停放處與淋浴更衣室、雨衣雨具放置空間、農場、花園等）。"
+        }
+       ],
+       "pdfPage": 71,
+       "ref": "表 1.5～1.10，手冊第 60 頁",
+       "status": "verified"
+      },
+      {
+       "id": "5.3.2.2",
+       "text": "可提供個別化主動調適服務",
+       "rule": "2分：提供個別化主動調適服務（如：溫度、照度等個別化主動調適機制），以滿足不同使用者之個別化需求。",
+       "max": 2,
+       "controls": [
+        {
+         "type": "check",
+         "points": 2,
+         "label": "提供個別化主動調適服務（如：溫度、照度等個別化主動調適機制），以滿足不同使用者之個別化需求。"
+        }
+       ],
+       "pdfPage": 71,
+       "ref": "表 1.5～1.10，手冊第 60 頁",
+       "status": "verified"
+      }
+     ]
+    }
+   ],
+   "basics": [
+    {
+     "id": "5.1.1.1",
+     "text": "熱環境及二氧化碳濃度狀態偵知偵知居室（如：辦公或會議等空間）溫熱環境，設置溫熱環境感測設施（如：溫度感測、濕度感測等），及二氧化碳濃度設施。感測器設置位置、數量，依空間環境、使用需求或感測器性能等條件因素配置。住宿類建築之環境狀態偵知，以共用空間為主。",
+     "pdfPage": 61,
+     "ref": "表 1.5～1.10，手冊第 50 頁"
+    }
+   ]
+  },
+  {
+   "id": "6",
+   "name": "智慧創新",
+   "hasBasic": false,
+   "basicNA": [],
+   "bonus": true,
+   "groups": [
+    {
+     "id": "6.1",
+     "name": "智慧創新設計手法、設備或系統應用",
+     "cap": 6,
+     "items": [
+      {
+       "id": "6.1.1",
+       "text": "提出智慧創新設計手法、設備或系統對建築物之安全、健康、便利、效率及維護等具有效益的創新設計手法、設備或系統。",
+       "rule": "應用智慧創新之規劃設計手法或應用創新設備系統技術，經評定小組會議認定具創意者並依其創新之程度給予適當分數，最高6分。",
+       "max": 6,
+       "controls": [
+        {
+         "type": "judged",
+         "max": 6,
+         "label": "經評定小組認定，依創新程度給分"
+        }
+       ],
+       "pdfPage": 72,
+       "ref": "表 1.5～1.10，手冊第 61 頁",
+       "status": "review",
+       "note": "需經評定小組會議認定，分數由評定結果決定，本工具僅供假設性試算。"
+      }
+     ]
+    },
+    {
+     "id": "6.2",
+     "name": "智慧營造",
+     "cap": 12,
+     "items": [
+      {
+       "id": "6.2.1",
+       "text": "採用預鑄工法為達到節能減碳、縮短現場作業時間及工班人力之目的，鼓勵採用預鑄工法進行建物的施工建造，以提升結構安全、減少混凝土及鋼筋用量。",
+       "rule": "3分：預鑄率達20%以上未達45%。6分：預鑄率達45%以上未達70%。8分：預鑄率達70%以上。申請案件如有另取得容積獎勵者，不予計分。建築物預鑄率計算方式如下：建築物預鑄率＝PW25%＋PC×20%＋PB×35%＋PF×15%＋PS×5%PW＝（地面層以上預鑄外牆（含女兒牆）牆體中心線總長度）/（地面層以上外牆（含女兒牆）牆體中心線總長度）PC＝（地面層以上預鑄柱之中心線總長度）/（地面層以上柱之中心線總長度）PB＝（地面層以上預鑄樑之中心線總長度）/（地面層以上樑之中心線總長度）PF＝（地面層以上預鑄樓板（含陽台樓板）之水平投影總面積）/（地面層以上樓板（含陽台樓板）之水平投影總面積）PS＝（地面層以上預鑄樓梯及衛浴總數量）/（地面層以上樓梯及衛浴總數量）",
+       "max": 8,
+       "controls": [
+        {
+         "type": "tier",
+         "options": [
+          {
+           "points": 3,
+           "label": "預鑄率 20% 以上未達 45%"
+          },
+          {
+           "points": 6,
+           "label": "預鑄率 45% 以上未達 70%"
+          },
+          {
+           "points": 8,
+           "label": "預鑄率 70% 以上（另取得容積獎勵者不予計分）"
+          }
+         ]
+        }
+       ],
+       "pdfPage": 72,
+       "ref": "表 1.5～1.10，手冊第 61 頁",
+       "status": "verified",
+       "note": "手冊規定：申請案件如另取得容積獎勵者，本項不予計分。若本案要申請都更／危老容積獎勵，請勿在此取分（實際候選證書案例中本項亦為 0）。"
+      },
+      {
+       "id": "6.2.2",
+       "text": "採用預製鋼筋工法為提升結構安全、減少人力需求以及在相同結構安全韌性下減少鋼筋使用量以達到節能減碳之目的，鼓勵採用預製鋼筋。",
+       "rule": "預製鋼筋種類包含預組鋼筋及系統鋼筋，施工部位以柱及牆較為普及。1分：柱或牆結構採用預組鋼筋。2分：柱或牆結構採用系統鋼筋。3分：柱及牆結構均採用預組鋼筋。4分：柱及牆結構均採用系統鋼筋。",
+       "max": 4,
+       "controls": [
+        {
+         "type": "tier",
+         "options": [
+          {
+           "points": 1,
+           "label": "柱或牆結構採用預組鋼筋。"
+          },
+          {
+           "points": 2,
+           "label": "柱或牆結構採用系統鋼筋。"
+          },
+          {
+           "points": 3,
+           "label": "柱及牆結構均採用預組鋼筋。"
+          },
+          {
+           "points": 4,
+           "label": "柱及牆結構均採用系統鋼筋。"
+          }
+         ]
+        }
+       ],
+       "pdfPage": 73,
+       "ref": "表 1.5～1.10，手冊第 62 頁",
+       "status": "verified"
+      }
+     ]
+    },
+    {
+     "id": "6.3",
+     "name": "智慧建材",
+     "cap": 6,
+     "items": [
+      {
+       "id": "6.3.1",
+       "text": "採用智慧建材為提升建築內部空間各項服務系統，使建築空間具備智慧化能力。鼓勵採用具有感知、處理、致動、辨識、自預警或自修復等功能的裝置、模組或系統，且能依使用者、環境或時間的需求產生適當對應的智慧建材。",
+       "rule": "3分：採用一項智慧建材。6分：採用兩項以上智慧建材。（智慧建材之認證要有公正第三方的認證作為加分原則。）",
+       "max": 6,
+       "controls": [
+        {
+         "type": "tier",
+         "options": [
+          {
+           "points": 3,
+           "label": "採用一項智慧建材。"
+          },
+          {
+           "points": 6,
+           "label": "採用兩項以上智慧建材。（智慧建材之認證要有公正第三方的認證作為加分原則。）"
+          }
+         ]
+        }
+       ],
+       "pdfPage": 74,
+       "ref": "表 1.5～1.10，手冊第 63 頁",
+       "status": "verified"
+      }
+     ]
+    },
+    {
+     "id": "6.4",
+     "name": "標準資料格式",
+     "cap": 4,
+     "items": [
+      {
+       "id": "6.4.1",
+       "text": "採用資料格式標準採用國內產業已發佈的智慧建築資料格式標準及驗測標準。智慧建築資料交換互通標準及測試規範，文件編號：TAICSTS-0054v1.0。",
+       "rule": "4分：採用智慧建築資料格式標準並提出驗測證明。",
+       "max": 4,
+       "controls": [
+        {
+         "type": "check",
+         "points": 4,
+         "label": "採用智慧建築資料格式標準並提出驗測證明。"
+        }
+       ],
+       "pdfPage": 75,
+       "ref": "表 1.5～1.10，手冊第 64 頁",
+       "status": "verified"
+      }
+     ]
+    },
+    {
+     "id": "6.5",
+     "name": "智慧管理雲平台",
+     "cap": 8,
+     "items": [
+      {
+       "id": "6.5.1",
+       "text": "採用智慧管理雲平台為統合建物內的運營數據，以便即時掌握完整營運狀況，鼓勵採用政府智慧管理雲平台。",
+       "rule": "3分：採用智慧管理雲平台作為建物的管理平台，且資料能定時匯入智慧管理雲平台數據庫。5分：於政府智慧管理雲平台上另開發具有一項（含）以上之智慧應用（例如：利用自動數據分析、預測演算法或人工智慧手法來達到降低營運成本、優化建物效能或提高設備妥善度）。",
+       "max": 8,
+       "controls": [
+        {
+         "type": "check",
+         "points": 3,
+         "label": "採用智慧管理雲平台作為建物管理平台，且資料定時匯入"
+        },
+        {
+         "type": "check",
+         "points": 5,
+         "label": "於政府智慧管理雲平台另開發 1 項（含）以上智慧應用"
+        }
+       ],
+       "pdfPage": 75,
+       "ref": "表 1.5～1.10，手冊第 64 頁",
+       "status": "review",
+       "note": "手冊未明說 5 分項是否以 3 分項為前提，本工具允許分別勾選。請對照手冊確認。"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+};
+  if (typeof module !== "undefined") module.exports = g.SBS_RULES["2024"];
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<script>
+/* 由 tools/build_preset.js 產生，請勿手改 */
+(function (g) { g.SBS_PRESET = g.SBS_PRESET || {}; g.SBS_PRESET["2024"] = {
+ "label": "專家建議取分組合",
+ "source": "使用者提供之參考表（2024 版 .xlsx）G 欄「得分」；非手冊內容，僅供試算參考",
+ "answers": {
+  "1.1.2": [
+   3
+  ],
+  "1.1.3": [
+   1
+  ],
+  "1.1.4": [
+   1
+  ],
+  "1.1.5": [
+   1
+  ],
+  "1.2.2": [
+   1,
+   1
+  ],
+  "1.2.3": [
+   1,
+   0,
+   0
+  ],
+  "1.3.4": [
+   1,
+   0,
+   0,
+   1,
+   0,
+   1
+  ],
+  "2.1.2": [
+   1
+  ],
+  "2.1.3": [
+   1,
+   1
+  ],
+  "2.1.5": [
+   1,
+   0,
+   0
+  ],
+  "2.2.2": [
+   0
+  ],
+  "2.3.3": [
+   1
+  ],
+  "2.3.5": [
+   0
+  ],
+  "3.1.1.3": [
+   1
+  ],
+  "3.1.1.5": [
+   1
+  ],
+  "3.1.1.6": [
+   1
+  ],
+  "3.1.2.1": [
+   3
+  ],
+  "3.1.2.2": [
+   2
+  ],
+  "3.1.3.2": [
+   1
+  ],
+  "3.1.3.3": [
+   1
+  ],
+  "3.1.3.5": [
+   1
+  ],
+  "3.1.3.6": [
+   1
+  ],
+  "3.1.3.7": [
+   1
+  ],
+  "3.2.1.2": [
+   1
+  ],
+  "3.2.2.2": [
+   1
+  ],
+  "3.2.3.2": [
+   1
+  ],
+  "3.2.4.2": [
+   1
+  ],
+  "4.1.1": [
+   1
+  ],
+  "4.1.3": [
+   0
+  ],
+  "4.2.2": [
+   1
+  ],
+  "4.2.3": [
+   4,
+   -1
+  ],
+  "4.2.4": [
+   2
+  ],
+  "4.3.3": [
+   1,
+   0
+  ],
+  "4.3.4": [
+   2
+  ],
+  "5.1.1.2": [
+   1,
+   1,
+   1,
+   0
+  ],
+  "5.1.2.1": [
+   1
+  ],
+  "5.1.2.2": [
+   1
+  ],
+  "5.1.2.3": [
+   1
+  ],
+  "5.1.2.4": [
+   1
+  ],
+  "5.1.3.1": [
+   1
+  ],
+  "5.1.3.2": [
+   1
+  ],
+  "5.2.1.1": [
+   1
+  ],
+  "5.2.1.4": [
+   1
+  ],
+  "5.3.1.1": [
+   1
+  ],
+  "5.3.1.2": [
+   1
+  ],
+  "6.3.1": [
+   1
+  ],
+  "6.4.1": [
+   1
+  ],
+  "6.5.1": [
+   1,
+   0
+  ]
+ },
+ "why": {
+  "1.1.2": "電力、空調、照明、給排水、進排風、電梯、消防、監視、門禁、保全防盜、對講、停車管理、緊急求救",
+  "1.1.3": "梯廳、安全梯（行動裝置可收到公眾行動網路信號，並進行通話或資料傳輸）",
+  "1.1.4": "1F大廳、地下室梯廳設置WIFI AP",
+  "1.1.5": "建築物公區WIFI測試連外",
+  "1.2.2": "光纖骨幹、WIFI",
+  "1.2.3": "設施管理系統軟體加強",
+  "1.3.4": "依手冊給分條件：1分：設置對外網路防火牆、防毒軟體機制(如：網頁防護、防毒掃描或入侵偵測等)。1分：雙因子的身份認證機制。1分：資訊安全相關設備具有軟體更新功能(如：防毒軟體)。",
+  "2.1.2": "依照圖面連動流程:；1.SOS連動CCTV；2.火災連動…；3. 需量卸載",
+  "2.1.3": "依手冊給分條件：1分：具運轉資訊異常預警通知功能。；1分：具網路資訊異常預警通知功能。",
+  "2.1.5": "依手冊給分條件：3分：具網頁(WEB)化作業管理系統。",
+  "2.2.2": "臉辯、通關機工地進出人員管制",
+  "2.3.3": "設施管理APP",
+  "2.3.5": "智慧平台: 靜態與動態數據數據統計分析",
+  "3.1.1.3": "智慧平台: 靜態與動態數據數據統計分析",
+  "3.1.1.5": "設計安裝機房漏水檢知",
+  "3.1.1.6": "設計安裝地震感測器",
+  "3.1.2.1": "多媒體看版: 火警、淹水、地震、用電異常",
+  "3.1.2.2": "火警連動: 電梯迫降、門禁開啟、排風機關閉、空調關閉",
+  "3.1.3.2": "火警連動: 排風機關閉、空調關閉",
+  "3.1.3.3": "須規劃智慧插座並整合到智慧平台",
+  "3.1.3.5": "火警連動: CCTV",
+  "3.1.3.6": "漏水連動: CCTV",
+  "3.1.3.7": "地震連動: 門禁開啟",
+  "3.2.1.2": "公共對講系統整合公設VoIP網路電話",
+  "3.2.2.2": "防盜告警，智慧平台APP",
+  "3.2.3.2": "SOS  喇叭連動CCTV",
+  "3.2.4.2": "智慧瓦斯遮斷系統",
+  "4.1.1": "採用1級節能標章設備",
+  "4.1.3": "依手冊給分條件：1分：高效率動力設備之採用率達50%以上。採用率依動力設備總功率計算。",
+  "4.2.2": "依手冊給分條件：2分：節能積分值合計達35以上。",
+  "4.2.3": "智慧插座、二線控排程、二線控情境、安裝智慧省電照明",
+  "4.2.4": "空氣品質面板連動空調；CO連動進排風；需量卸載琣排水泵浦；電梯加裝電能回收系統",
+  "4.3.3": "需量3階段卸載: 空調、進排風、照明",
+  "4.3.4": "智慧平台顯示照明總用電、插座總用電",
+  "5.1.1.2": "安裝 空氣品質偵測器、室外感測器、水質偵測器、照度感測。參考表此列得 3 分，紅字標了 4 條，這裡取其中 3 項。",
+  "5.1.2.1": "智慧平台顯示溫溼度數據",
+  "5.1.2.2": "智慧平台顯示空氣品質例如PM2.5...等數據",
+  "5.1.2.3": "智慧平台顯示照度感測數據",
+  "5.1.2.4": "智慧平台顯示水質感測數據",
+  "5.1.3.1": "溫溼度設備連動空調",
+  "5.1.3.2": "照度設備連動照明系統",
+  "5.2.1.1": "血氧、血壓機可量測",
+  "5.2.1.4": "門口機有人臉辨識功能、門禁解鎖按鈕皆為非接觸式",
+  "5.3.1.1": "設施管理系統: 預約系統",
+  "5.3.1.2": "設施管理系統: 郵件包裹提醒、繳費通知。手冊為 2 分，僅部分符合時取 1 分，實際由評定小組認定。",
+  "6.3.1": "智慧插座、消防主機、地震感測器、中央監控平台、對講系統",
+  "6.4.1": "智慧平台: 須支援TAICS 資料格式",
+  "6.5.1": "智慧平台:能自動定期上傳數據到智慧管理雲平台數據庫"
+ },
+ "total": 117
+}; })(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<script>
+/* 容積獎勵（只適用都更／危老重建案件）。
+ * 來源：《都市危險及老舊建築物建築容積獎勵辦法》第 8 條、第 11 條（全國法規資料庫，民國 114 年 3 月 4 日修正）。
+ * 法規可能再修正，請以最新條文為準。 */
+(function (g) {
+  g.SBS_INCENTIVE = {
+    source: '都市危險及老舊建築物建築容積獎勵辦法 第 8 條、第 11 條（114 年 3 月 4 日修正）',
+    url: 'https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0070258',
+    basis: '依「候選等級智慧建築證書」的等級，給予基準容積的獎勵',
+    levels: { '合格級': 2, '銅級': 4, '銀級': 6, '黃金級': 8, '鑽石級': 10 },
+    notes: [
+      '重建計畫範圍內建築基地面積達 500 平方公尺以上者，銅級與合格級不適用獎勵。',
+      '須在領得使用執照前繳納保證金；領得使用執照後二年內須取得智慧建築標章，取得者保證金無息退還，未取得者不予退還。',
+      '本表只適用都更危老重建案件，一般智慧建築標章申請沒有容積獎勵。',
+    ],
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* 審查提醒：依一件實際案例（公有社會住宅統包案）第一次審查意見整理，已去除廠商與案件名稱。
+ * 只是「容易被問到的地方」的經驗提醒，不是手冊條文，也不代表所有審查委員的看法。 */
+(function (g) {
+  'use strict';
+  const SIZE = '所有文件（規劃說明書、圖說、規範、I/O 點數表）的設備位置、數量與名稱要互相一致，不一致是最常見的補件原因。';
+  g.SBS_REVIEW = {
+    '2024': {
+      source: '依一件實際案例的第一次審查意見整理',
+      common: SIZE,
+      items: {
+        '1.1.2': ['各系統「相對應的平面圖」，說明水平佈線支援哪些系統。'],
+        '1.1.3': ['要有架構圖，並在平面圖標示行動通訊天線涵蓋範圍；地上各層安全梯也要確認涵蓋。', '只標示天線位置不夠，要畫出訊號涵蓋範圍；電梯車廂與逃生梯的佈線架構和分路器節點也要獨立繪製。'],
+        '1.1.4': ['公共空間要有明確的無線區域網路規劃；若 AP 實際是供監控設備傳輸用，審查會視為物聯網（1.1.5）用途而非住戶使用，不一定能取 1.1.4。'],
+        '1.2.1': ['規範中具體寫出佈線標示與識別的做法（編號表、跳線面板與收容箱之纜線編號表、纜線兩端標示等），只寫「會標示」不夠。'],
+        '1.3.2': ['要寫明各子系統採用的標準資料格式，例如 JSON 或 TAICS 智慧建築標準資料格式。'],
+        '1.3.4': ['資安每一分都要對應到規劃說明書與規範：帳號權限管理、雙因子身份認證等都要寫出來，只提到「軟硬體權限」會被要求補充。'],
+        '2.1.1': ['基本規定：要補 I/O 點數表。'],
+        '2.1.2': ['申請的跨系統連動（要 3 項以上）必須與維運管理規劃說明書一致；每項連動都要有連動圖和 I/O 表點位，缺一就要補。'],
+        '2.3.1': ['基本規定：要補 I/O 點數表與智慧建築管理平台架構圖（含整合協定）。', '架構圖不能只畫線連接設備，要標示各系統之間的通訊協定（例如 TCP/IP、RS485、Relay）。'],
+        '2.3.2': ['基本規定：只有設施管理系統架構圖不夠，規範要寫出：網頁化操作、設備故障紀錄查詢、財務／資產／郵務或訪客等物業管理功能、產製管理報表。'],
+        '3.1.1.1': ['基本規定：要有各區消防設備平面圖；停車場區也要說明具火警感知功能（例如補灑水系統平面圖）。'],
+        '3.1.1.5': ['漏水感測器的數量與位置，I/O 表、平面圖和規劃說明書要一致。'],
+        '3.1.1.6': ['要補地震偵測器配置圖（標示設備位置）與系統規範，只在 I/O 表出現不夠。'],
+        '3.1.2.1': ['要補多媒體顯示裝置的配置圖及規範；住宿類若要取分，戶內影音對講系統也要能顯示地震、淹漏水、火災告警。做不到就不要取此項（該案最後取 0 分）。'],
+        '3.1.2.2': ['可改取「連動設備狀態顯示」：消防連動昇降機迫降、門禁解鎖、排風機關閉、空調關閉、照明開啟等狀態，要在公共空間顯示。'],
+        '3.1.3.1': ['基本規定：要補門禁系統配置圖與規範，並在電梯圖說或規範寫明火警時昇降機迫降至避難層。'],
+        '3.1.3.2': ['I/O 表要同時有消防連動「空調」與「地下室送排風」的點位；另補空調與送排風配置圖及規範。'],
+        '3.1.3.6': ['攝影機的位置與涵蓋角度，原則上要能直接拍到漏水偵測器的位置，位置不對會被要求調整。'],
+        '3.1.3.7': ['要補地震偵測器配置圖與規範、門禁系統配置圖與規範，且規劃說明書要列出本項。'],
+        '3.2.1.5': ['基本規定：要補監視系統規範。'],
+        '3.2.1.6': ['基本規定：要補保全系統架構圖與防盜保全裝置規範（例如磁簧開關、紅外線偵測器），圖面設備要與規劃說明書一致。'],
+        '3.2.2.1': ['基本規定：要補緊急求救的 I/O 點數表與規範（含求救按鈕）；說明書若提到室外停車場，要與本案實際相符。'],
+        '3.2.2.2': ['要補防盜保全裝置配置圖及規範（同 3.2.1.6）。'],
+        '3.2.3.1': ['基本規定：要補緊急求救與監視系統規範，且重要處所的求救警報要連動攝影機影像。'],
+        '3.2.4.1': ['基本規定：要補系統架構圖與規範；停車場 CO 偵測器依每 400 ㎡ 至少 1 處檢討數量（例如 3408 ÷ 400 ≈ 8.52，要設 9 顆）及安裝高度。'],
+        '3.2.4.2': ['CO 連動送排風要寫明「多少 ppm 啟動」，不能只寫「超過安全標準」；瓦斯遮斷閥或微電腦瓦斯表要標示在平面圖並補規範與 I/O 點位。'],
+        '4.1.1': ['I/O 表的空調室外機數量要與空調選機表一致。'],
+        '4.1.2': ['基本規定：燈具能效（lm/W）數值要正確，且「採用 LED 燈具」的描述要與燈具統計一致。'],
+        '4.2.3': ['時程控制（例如景觀燈）要在 I/O 表標示時序控制功能，並在電力單線圖標示控制繼電器迴路。', '同為「感應控制」的照明不宜重複取分；只靠光照度感應開關燈（類似樓梯感應燈）不給分，要能依光照度調光，並說明控制依據與預設調光機制。', '電力插座不可與燈光混盤，才符合取分原則，要請電機技師確認。'],
+        '4.2.5': ['基本規定：I/O 表數位水表的數量要與用水昇位圖一致。'],
+        '4.3.1': ['基本規定：I/O 表要標明哪顆電表是哪種用電（總用電、空調、照明、動力），並在電力單線圖分列標示；用語要正確（功率因「數」）。'],
+        '4.3.3': ['I/O 表標示的需量控制設備，要與節能規劃說明書一致。'],
+        '4.3.4': ['要明確寫出申請哪「兩項」用電資訊視覺化顯示，並把各自的數位電表列入 I/O 表與電力單線圖，同時計算採用率達 80% 以上；照明與動力用電不可混盤。'],
+        '5.1.1.1': ['基本規定：規劃說明書的設置位置與偵知項目要正確，規範要涵蓋溫濕度與 CO₂ 的偵測範圍，不能只寫其中一項。'],
+        '5.1.1.2': ['已用於 5.1.1.1 的溫濕度與 CO₂ 不能重複取分，要「另外」增加 PM2.5、TVOC、光環境、水質或室外環境等偵測才能取加分。', '每一個得分項要對應各自的平面圖與規範（例如戶外溫濕度與雨量偵測、水箱水質偵測），且自評表填寫的位置不可誤植。'],
+        '5.1.2.1': ['要說明偵測資訊如何顯示（顯示器或 APP），以及如何提供紀錄、查詢、分析和超標時的主動異常提醒；規範要寫明數據儲存在中央監控系統並可查詢與分析。'],
+        '5.1.2.2': ['同 5.1.2.1：顯示方式與紀錄、查詢、分析、異常提醒都要在規範寫明。'],
+        '5.1.2.4': ['水環境（例如水箱水質）偵測要有對應的規範與圖面，並寫明數據儲存、查詢與異常警報機制，否則會被認為查無對應內容。'],
+        '6.3.1': ['智慧建材需依認定原則，在平面圖等圖面標示平台設備的安裝位置，並清楚說明本案應用範圍（例如中控電腦與物業管理平台的位置）。']
+      }
+    }
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* 案例做法與補正經驗：依一件鑽石級辦公大樓的案例分享簡報整理（已去除案名與廠商）。
+ * did    = 該案「做了什麼就取到分」（得分為審查後結果，僅供參考，不是手冊條文）。
+ * remind = 審查或補正時被問到的地方，會併入「提醒」。
+ * 簡報為重繪摘要，細節以手冊與原圖說為準；與手冊不符的部分（例如 4.3.6 的分數）未收錄。 */
+(function (g) {
+  'use strict';
+  g.SBS_LESSONS = {
+    '2024': {
+      source: '依一件鑽石級辦公大樓的案例分享簡報整理（審查後結果）',
+      did: {
+        '1.1.1': ['昇位圖標示垂直主幹光纖的芯數與起訖（機房→各樓層配線箱），平面圖標出光纖轉接箱位置。'],
+        '1.1.2': ['光纖由防災中心經分光器到各樓層終端，列出光纖支援的系統（電力、給排水、送排風、無線 AP、停車、人流、多媒體、數位電話等）取 4 分；Cat6 銅纜支援門禁、保全、緊急求救、對講、監視、無線 AP 等取 4 分，合計 8 分。'],
+        '1.1.3': ['4G＋5G 多頻強波器，室外天線經分配器接室內天線；電梯車廂另有專用強波器與天線；涵蓋圖標出地上各層梯廳與逃生梯、地下各層與電梯車廂（得 2 分）。'],
+        '1.1.4': ['網路架構（防火牆→交換器→AP）、AP 依平面圖配置在公共空間與必要工作區；規範寫明接收訊號不低於 −75 dBm 並要現場測試；網管軟體監測封包遺失與延遲，異常彈窗並簡訊／Email 通知（得 1 分）。'],
+        '1.1.5': ['無線空品感測器→AP→交換器→管理系統，平面圖標示位置與安裝高度，並列出蒐集項目、介接協定與頻率（得 2 分）。'],
+        '1.2.1': ['規範寫出命名規則（建築—樓層—房間—機櫃—面板—埠口）、標籤材質、命名清單或條碼；纜線起訖兩端用相同識別碼。'],
+        '1.2.3': ['維運計畫分三層：每年巡檢、事件（颱風、地震等）後檢查、每 10 年整修；資料納入維運系統查詢，另有 BIM／3D 查詢介面可看線路元件屬性與維護歷程（1＋2＋2，得 5 分）。'],
+        '1.3.2': ['動態資料列出 12 類（電力、空調、照明、給排水、電梯、環境、人流、門禁、停車、消防、求救…），逐類寫介接方式與頻率，並說明 API 與 TAICS 交換格式（得 3 分）。'],
+        '2.1.1': ['以「需求→服務目的（安全、健康、便利、效率、維護）→整合→應用」說明規劃，並附 I/O 功能對照表。'],
+        '2.1.2': ['取 1 項跨系統連動（2 分）：風速達 8 級以上，頂樓門禁改為只進不出並在看板顯示；火警優先，解除門禁。連動要有流程、I/O 點位與圖說。'],
+        '2.1.3': ['運轉預警寫出伺服器 CPU、記憶體、硬碟的閾值；網路異常用定期 Ping，連續無回應或回應過慢即判定，並以彈窗、聲音、Email 與日誌通知（1＋1，得 2 分）。'],
+        '2.1.5': ['WEB 維運系統含工單流程、行動巡檢、BIM 空間連結（3 分）；危機應變有分級、回復時間、權責、各系統處理流程與通報單（2 分）；五年修繕計畫未取。'],
+        '2.3.4': ['BIM 可視化瀏覽＋即時設備資訊＋遠端控制（點選模型→權限確認→經中央監控控制→狀態回傳），遠端控制設備要有 I/O 可控點位（得 5 分）。'],
+        '2.3.5': ['取 2 項（4 分）：能源需求預測、加壓水泵 AI 異常檢測；水泵的多種告警視為同一應用，不拆項。'],
+        '3.1.1.1': ['受信總機以通訊介面接到平台，地下層（含停車場）也有火警移報；I/O 寫移報點數而非探測器數。'],
+        '3.1.1.2': ['安全梯常閉式防火門加磁簧，經 DI 模組到平台顯示開關狀態；I/O 點數與平面圖門位逐點對照。'],
+        '3.1.1.5': ['漏水檢知帶與感測器依樓層配置，輸出接點入 DI，I/O、平面圖、規範數量一致（得 1 分）。'],
+        '3.1.1.6': ['地震感測器（三軸加速度計）加偵測主機，規範寫觸發邏輯（兩組超過門檻）、事件紀錄與平台顯示，並附型錄（得 2 分）。'],
+        '3.1.3.2': ['I/O 同時有空調與地下室送排風的消防連動點位，另附連動圖與配置圖；消防排煙設備不被停機（得 1 分）。'],
+        '3.1.3.5': ['機房等設備集中區的溫度感知器異常時，管理端顯示對應攝影機畫面，配置圖標出感測點與攝影機對應（得 3 分）。'],
+        '3.1.3.7': ['地震達警戒值自動解除門禁，震後復歸刷卡管制，並寫入圖說（得 2 分）。'],
+        '3.2.1.1': ['公共區域緊急對講機（免持、迴音消除）連到管理機，I/O 與配置圖列項。'],
+        '3.2.1.2': ['對講系統經 App 伺服器以 SIP 與手機雙向通話，規範寫帳號數與協定（得 2 分）；只有推播不算。'],
+        '3.2.1.3': ['讀卡機＋門禁控制器＋陽極鎖，規範寫管制區域、通行對象與時間，並寫明火警時解除門禁。'],
+        '3.2.1.4': ['車道辨識（E-tag 或車牌）加柵欄機，開停控制與故障訊號入 I/O，並寫明火警時解除管制。'],
+        '3.2.1.5': ['攝影機位置、NVR 容量與保存天數（重要區域至少 1 個月）、事件連動跳出影像，容量試算與攝影機台數一致。'],
+        '3.2.1.7': ['人流計數加「安全應用」：滯留人數推估、容留警戒值告警、災時參考（得 3 分）。'],
+        '3.2.2.2': ['防盜訊號經平台推播到管理人員手機 App，並補手機功能規範（得 1 分）。'],
+        '3.2.3.1': ['配置圖標示求救設備與攝影機的關聯區域，求救時管理端顯示現場畫面。'],
+        '3.2.3.2': ['防盜偵測連動影像呼叫與小喇叭，標示偵測點、攝影機、喇叭位置（得 3 分）。'],
+        '3.2.4.1': ['停車場 CO 偵測器顯示濃度、位置與異常告警，數量與平面圖、I/O 一致。'],
+        '3.2.4.2': ['CO 超標啟動排風，附連動圖（偵測→控制→排風→狀態回傳），I/O 標明各風機點位（得 1 分）。'],
+        '4.1.3': ['動力設備功率計算表（高效率設備功率 505.9 kW ÷ 總功率 697.9 kW ≈ 72%，需 ≥50%），設備附變頻器（得 2 分）。'],
+        '4.2.1': ['只取智慧遮陽 1 分：室外照度連動電動捲簾，附照度門檻與開度動作表、配置圖、I/O 點位。'],
+        '4.2.2': ['依手冊空調節能技術積分表累加（變頻主機、CO₂ 外氣量控制、全熱交換、外氣冷房、變風量、TAB、Cx 共 59 點，≥45 得 4 分），採用率 ≥50%。'],
+        '4.2.3': ['取畫光利用與人員感知各 1 分（共 2 分）；時程、情境、插座無對應說明就放棄。'],
+        '4.2.4': ['停車場 CO 調速風機＋昇降機電能回收，功率採用率 72%（≥50%）得 4 分。'],
+        '4.2.7': ['屋頂太陽光電 40.6 kWp（模組容量，≥32 kW）得 3 分，補發電監視點（電流、電壓、有效電力、電力度）。'],
+        '4.3.2': ['只取氣冷式主機入風溫度偵知與運轉偏差率 1 分（偏差率 <40%，35% 警戒）；冰水、冷卻水系統不適用。'],
+        '4.3.3': ['只取即時需量控制 1 分：超過契約容量→通風→照明→空調依序卸載，並可設定復歸。'],
+        '5.1.1.1': ['標準層平面圖標示溫濕度與 CO₂ 感測器，說明依空間類型與面積的配置原則，並接到 BMS 顯示。'],
+        '5.1.1.2': ['另外增加空氣品質、光環境、水質、室外環境四類偵知，各有配置圖、規格與顯示畫面（共 4 分）。'],
+        '5.1.2.3': ['照度感測器若同時用於 4.2.3 調光，顯示功能仍要另外有顯示畫面與紀錄查詢說明。'],
+        '5.1.3.1': ['寫出「感測值→控制動作」流程（例如 CO₂ 超標→外氣風門、風量），附平面圖、昇位圖與平台告警畫面。'],
+        '5.1.3.2': ['日照與室內照度連動 LED 調光與遮陽，附控制流程圖與平台告警畫面。'],
+        '6.5.1': ['採用雲平台作建物管理平台，資料定時匯入（得 3 分）；5 分需另開發一項智慧應用，該案未取。']
+      },
+      remind: {
+        '1.1.1': ['昇位圖與平面圖要對得起來，補正時常被要求逐項核對。'],
+        '1.1.4': ['AP 平面配置要與圖例和符號數量一致。'],
+        '1.2.4': ['充電設備規格（電壓、電流）在圖說、I/O、規範要一致。'],
+        '1.3.3': ['網路備援的圖面要畫出雙線路與雙路徑，只在規範承諾，圖面沒畫會被保留。'],
+        '1.3.4': ['資安認證設備（FCC、CE、BSMI）不算資安認證；加密要指明被加密的資料範圍，只寫設備支援 AES 不夠；多種身分驗證不等於雙因子認證。'],
+        '2.1.2': ['與其他指標已計分的連動不可重複計。'],
+        '2.1.5': ['危機應變的啟動條件，規範前後要統一。'],
+        '2.2.1': ['工程期間要保存照片、影像與紀錄，評定時會被要求；規範值（辨識率、防護等級）要與型錄一致。'],
+        '2.2.2': ['電子看板是管理配套，不算第二項功能；要取 4 分需另有不同功能（例如定位追蹤）。'],
+        '2.3.3': ['要是「管理者」操作的功能（一般使用者功能不算），並附 App 架構圖；遠端操作需權限並留紀錄。'],
+        '2.3.4': ['只有示意圖會被要求補 I/O 與可控設備，遠端控制的設備要有可控點位。'],
+        '2.3.5': ['流量若由頻率加壓力換算，要寫明是估算值；規模不足、效益不明的應用（例如雨水滯洪預測）不被採計；自評 3 項可能只認 2 項。', '沒有 I/O 點位支持的 AI 分析視為無效，分析用到的監測數據要在 I/O 表找得到。'],
+        '3.1.1.1': ['地下層（含停車場）的火警移報要納入，否則會被要求補正。'],
+        '3.1.1.3': ['充電設備的樓層與數量，I/O、平面圖、單線圖要一致；與 3.1.3.3、1.2.4 相近，不要重複取分。'],
+        '3.1.1.4': ['只有溫度感測器加影像輔助確認不算，要有「長時間溫度紀錄→判斷異常→火警告警」。'],
+        '3.1.1.6': ['第一次審查曾因顯示功能未確認被評 0 分，補規範與型錄後取得 2 分。'],
+        '3.1.2.1': ['要寫明顯示哪幾種災害與各自訊號來源，並把顯示位置標在平面圖；水災若來源是漏水偵測要說清楚；看板播放器的數量不等於災害種類。'],
+        '3.1.2.2': ['自評不要多填：只有 2 種狀態就是 1 分。'],
+        '3.1.3.1': ['第一次常因缺連動圖說被判不符合；解除門禁不等於開防火門。'],
+        '3.1.3.2': ['第一次曾因缺 I/O 與連動圖被評 0 分；空調與地下室送排風的點位要同時有。'],
+        '3.1.3.3': ['要寫成設備本機保護的斷電動作，並與 3.1.1.3（偵測）區分。'],
+        '3.1.3.4': ['一般出口標示燈、火警警報、門禁解除都不等於動態避難引導。'],
+        '3.1.3.5': ['第一次曾因缺 I/O 與預警對應被評 0 分；防災輔助監測不取代法定消防。'],
+        '3.1.3.6': ['第一次曾因缺漏水與攝影機關聯位置被評 0 分；與 3.1.1.5 是不同項，不以點數換算。'],
+        '3.1.3.7': ['第一次曾因缺連動機制被評 0 分；與 3.1.1.6、3.1.3.1 不混同加分。'],
+        '3.2.1.3': ['第一次曾因未確認火警解除門禁被判不符合。'],
+        '3.2.1.4': ['第一次缺故障訊號、第二次缺系統連動，都被判不符合，補齊後才通過。'],
+        '3.2.1.6': ['第一次曾因缺位置、數量與主動告警被判不符合。'],
+        '3.2.1.7': ['前兩次審查都因安全應用說明不足評 0 分，補強後取得 3 分。'],
+        '3.2.2.2': ['第一次曾因缺通報與手機功能規範評 0 分；SIP 語音對講不能推定有推播告警。'],
+        '3.2.3.1': ['第一次曾因缺攝影機關聯位置圖被判不符合。'],
+        '3.2.3.2': ['第一次曾因缺位置、數量與關聯圖評 0 分。'],
+        '3.2.4.1': ['要有濃度數值、位置顯示與異常告警，不是裝了感測器就好；CO 與 CO₂ 不可混用。'],
+        '3.2.4.2': ['第一次曾因缺 CO 連動圖評 0 分。'],
+        '4.1.1': ['要有認證證書與現場文件才能取 2 分。'],
+        '4.1.3': ['第一次曾因缺計算表評 0 分，補功率計算表後取得 2 分；電梯位能回收屬 4.2.4，不能當作本項馬達效率證明。'],
+        '4.1.4': ['要取此項需計算書（線長、負載電流、功率因數）。'],
+        '4.2.2': ['採用率口徑（面積或功率）要一致並寫明；TAB、Cx 若只有承諾書，要說明驗證時程。'],
+        '4.2.3': ['時程、情境若無對應控制說明與 I/O 點位就不要取；插座要有數量占比與書圖；有線與無線燈控並存時要逐迴路說明。'],
+        '4.2.4': ['電梯電能回收要附切結或證明；採用率分母「動力總功率」要加總所有動力設備，是功率比不是節電率。'],
+        '4.2.5': ['I/O 的水表樓層與數量要與用水昇位圖一致，並標明即時視覺化。'],
+        '4.2.6': ['水平衡圖有的水路，要在 I/O 分列水表並標示樓層、流向與即時視覺化；沒設表的要說明「未設」。'],
+        '4.2.7': ['容量以模組容量計算（不是變流器額定輸出）；未設儲能就不要附儲能圖說。'],
+        '4.3.2': ['要說明與 4.2.2 節能技術的差異；偵測點以點數計，要獨立列在 I/O；偏差偵知後如何提高運轉效率也要寫。'],
+        '4.3.3': ['I/O 的卸載設備要與架構圖、規範逐項一致，寫明卸載順序、卸載值與復歸條件；不納入卸載的設備要在各文件一併刪除。'],
+        '4.3.4': ['I/O 的每個電表要標示電力度與視覺化功能，並分列所屬盤名；採用率口徑（kW 或 kWh）要一致。'],
+        '4.3.5': ['被問過的重點：用電監測範圍與系統架構、AI 分析功能與控制邏輯。'],
+        '5.1.1.1': ['要補感測器與 BMS 的連接架構與顯示畫面。'],
+        '5.1.1.2': ['每一類偵知都要有自己的配置圖、規格與顯示畫面。'],
+        '5.1.2.1': ['單有感測器配置圖不夠，要有平台與 App 畫面，並說明歷史紀錄查詢與異常提醒。'],
+        '5.1.3.1': ['要附平台顯示畫面與異常告警。'],
+        '5.2.1.1': ['要有傳輸、紀錄、查詢與異常告警，並附平台畫面。'],
+        '5.2.1.3': ['整個審查過程都沒提圖說，所以沒有得分。'],
+        '5.3.1.2': ['評定會曾問提醒如何送達（是否為 App），補 App 介面與推播說明後採計。'],
+        '6.4.1': ['除了規範寫採用，還要有 TAICS TS-0054 的驗測證明。'],
+        '6.5.1': ['被退回兩次：只有「申請中」文件、沒有審核確認不算；要補已通過審核的證明、實際運作畫面與資料定時匯入的證據。']
+      }
+    }
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* 由 tools/build_cases.py 產生，請勿手改。已去除建案名稱與廠商，僅供內部對照（管理者模式顯示）。 */
+(function (g) { g.SBS_CASES = g.SBS_CASES || {}; g.SBS_CASES["2024"] = {
+ "note": "案例 A、B 為去識別後的實際自評表，各指標小計已與原表核對一致；案例 B 為審查前的自評，審查後的意見表合計 56 分。僅作取分傾向參考，不代表審查結果。 案例 C 取自案例分享簡報（已去識別），項目分數未能與原表小計核對；簡報標示最終 159 分，但 6 指標分項只找到 7 分（總表為 13），故不顯示總分，僅供參考。",
+ "cases": [
+  {
+   "id": "A",
+   "label": "辦公・鑽石級（候選證書自評）",
+   "stage": "候選證書",
+   "scores": {
+    "1.1.2": 8,
+    "1.1.3": 2,
+    "1.1.4": 1,
+    "1.1.5": 2,
+    "1.1.6": 0,
+    "1.2.2": 2,
+    "1.2.3": 3,
+    "1.2.4": 2,
+    "1.3.2": 2,
+    "1.3.3": 4,
+    "1.3.4": 3,
+    "1.3.5": 0,
+    "2.1.2": 6,
+    "2.1.3": 1,
+    "2.1.5": 5,
+    "2.2.1": 4,
+    "2.2.2": 2,
+    "2.2.3": 2,
+    "2.3.3": 2,
+    "2.3.4": 0,
+    "2.3.5": 4,
+    "3.1.1.3": 2,
+    "3.1.1.4": 3,
+    "3.1.1.5": 1,
+    "3.1.1.6": 2,
+    "3.1.2.1": 4,
+    "3.1.2.2": 4,
+    "3.1.3.2": 1,
+    "3.1.3.3": 3,
+    "3.1.3.4": 0,
+    "3.1.3.5": 3,
+    "3.1.3.6": 2,
+    "3.1.3.7": 2,
+    "3.2.1.2": 2,
+    "3.2.1.7": 3,
+    "3.2.2.2": 1,
+    "3.2.3.2": 3,
+    "3.2.4.2": 1,
+    "4.1.1": 2,
+    "4.1.3": 1,
+    "4.1.4": 0,
+    "4.2.1": 0,
+    "4.2.2": 2,
+    "4.2.3": 3,
+    "4.2.4": 3,
+    "4.2.6": 2,
+    "4.2.7": 0,
+    "4.3.2": 0,
+    "4.3.3": 2,
+    "4.3.4": 2,
+    "4.3.5": 6,
+    "4.3.6": 0,
+    "5.1.1.2": 4,
+    "5.1.2.1": 3,
+    "5.1.2.2": 3,
+    "5.1.2.3": 3,
+    "5.1.2.4": 3,
+    "5.1.3.1": 2,
+    "5.1.3.2": 2,
+    "5.2.1.1": 2,
+    "5.2.1.2": 0,
+    "5.2.1.3": 2,
+    "5.2.1.4": 1,
+    "5.2.1.5": 2,
+    "5.2.2.1": 0,
+    "5.2.2.2": 0,
+    "5.3.1.1": 2,
+    "5.3.1.2": 2,
+    "5.3.2.1": 2,
+    "5.3.2.2": 0,
+    "6.1.1": 1,
+    "6.2.1": 0,
+    "6.2.2": 0,
+    "6.3.1": 6,
+    "6.4.1": 4,
+    "6.5.1": 3
+   },
+   "expectSub": [
+    29,
+    26,
+    37,
+    23,
+    33,
+    14
+   ],
+   "subtotals": [
+    29,
+    26,
+    37,
+    23,
+    33,
+    14
+   ],
+   "total": 162
+  },
+  {
+   "id": "B",
+   "label": "社會住宅（自評，審查前）",
+   "stage": "自評（審查前）",
+   "scores": {
+    "1.1.2": 4,
+    "1.1.3": 0,
+    "1.1.4": 1,
+    "1.1.5": 0,
+    "1.1.6": 0,
+    "1.2.2": 1,
+    "1.2.3": 1,
+    "1.2.4": 0,
+    "1.3.2": 3,
+    "1.3.3": 0,
+    "1.3.4": 3,
+    "1.3.5": 0,
+    "2.1.2": 6,
+    "2.1.3": 2,
+    "2.1.5": 5,
+    "2.2.1": 0,
+    "2.2.2": 0,
+    "2.2.3": 0,
+    "2.3.3": 0,
+    "2.3.4": 0,
+    "2.3.5": 0,
+    "3.1.1.3": 0,
+    "3.1.1.4": 0,
+    "3.1.1.5": 1,
+    "3.1.1.6": 2,
+    "3.1.2.1": 0,
+    "3.1.2.2": 4,
+    "3.1.3.2": 1,
+    "3.1.3.3": 0,
+    "3.1.3.4": 0,
+    "3.1.3.5": 0,
+    "3.1.3.6": 2,
+    "3.1.3.7": 2,
+    "3.2.1.7": 0,
+    "3.2.2.2": 1,
+    "3.2.3.2": 3,
+    "3.2.4.2": 1,
+    "4.1.1": 2,
+    "4.1.3": 0,
+    "4.1.4": 1,
+    "4.2.1": 0,
+    "4.2.2": 0,
+    "4.2.3": 2,
+    "4.2.4": 0,
+    "4.2.6": 0,
+    "4.2.7": 0,
+    "4.3.2": 0,
+    "4.3.3": 1,
+    "4.3.4": 1,
+    "4.3.5": 0,
+    "4.3.6": 0,
+    "5.1.1.2": 2,
+    "5.1.2.1": 3,
+    "5.1.2.2": 3,
+    "5.1.2.3": 0,
+    "5.1.2.4": 3,
+    "5.1.3.1": 0,
+    "5.1.3.2": 0,
+    "5.2.1.1": 0,
+    "5.2.1.2": 0,
+    "5.2.1.3": 0,
+    "5.2.1.4": 1,
+    "5.2.1.5": 0,
+    "5.2.2.1": 0,
+    "5.2.2.2": 0,
+    "5.3.1.1": 0,
+    "5.3.1.2": 0,
+    "5.3.2.1": 0,
+    "5.3.2.2": 0,
+    "6.1.1": 0,
+    "6.2.1": 0,
+    "6.2.2": 0,
+    "6.3.1": 0,
+    "6.4.1": 4,
+    "6.5.1": 0
+   },
+   "expectSub": [
+    13,
+    13,
+    17,
+    7,
+    12,
+    4
+   ],
+   "subtotals": [
+    13,
+    13,
+    17,
+    7,
+    12,
+    4
+   ],
+   "total": 66
+  },
+  {
+   "id": "C",
+   "label": "辦公・鑽石級（案例分享簡報，審查後）",
+   "stage": "案例分享（部分項目未核）",
+   "scores": {
+    "1.1.2": 8,
+    "1.1.3": 2,
+    "1.1.4": 1,
+    "1.1.5": 2,
+    "1.2.2": 2,
+    "1.2.3": 5,
+    "1.2.4": 2,
+    "1.3.2": 3,
+    "1.3.3": 3,
+    "1.3.4": 3,
+    "1.3.5": 0,
+    "2.1.2": 2,
+    "2.1.3": 2,
+    "2.1.5": 5,
+    "2.2.1": 4,
+    "2.2.2": 2,
+    "2.2.3": 0,
+    "2.3.3": 2,
+    "2.3.4": 5,
+    "2.3.5": 4,
+    "3.1.1.3": 2,
+    "3.1.1.4": 0,
+    "3.1.1.5": 1,
+    "3.1.1.6": 2,
+    "3.1.2.1": 3,
+    "3.1.2.2": 1,
+    "3.1.3.2": 1,
+    "3.1.3.3": 3,
+    "3.1.3.4": 0,
+    "3.1.3.5": 3,
+    "3.1.3.6": 2,
+    "3.1.3.7": 2,
+    "3.2.1.2": 2,
+    "3.2.1.7": 3,
+    "3.2.2.2": 1,
+    "3.2.3.2": 3,
+    "3.2.4.2": 1,
+    "4.1.1": 2,
+    "4.1.3": 2,
+    "4.1.4": 0,
+    "4.2.1": 1,
+    "4.2.2": 4,
+    "4.2.3": 2,
+    "4.2.4": 4,
+    "4.2.6": 2,
+    "4.2.7": 3,
+    "4.3.2": 1,
+    "4.3.3": 1,
+    "4.3.4": 2,
+    "4.3.5": 6,
+    "5.1.1.2": 4,
+    "5.1.2.1": 3,
+    "5.1.2.2": 3,
+    "5.1.2.3": 3,
+    "5.1.2.4": 3,
+    "5.1.3.1": 2,
+    "5.1.3.2": 2,
+    "5.2.1.1": 2,
+    "5.2.1.2": 2,
+    "5.2.1.3": 0,
+    "5.2.1.4": 1,
+    "5.2.1.5": 0,
+    "5.2.2.1": 0,
+    "5.2.2.2": 0,
+    "4.3.6": 2,
+    "5.3.1.2": 2,
+    "6.4.1": 4,
+    "6.5.1": 3
+   },
+   "partial": true,
+   "subtotals": [
+    31,
+    26,
+    30,
+    32,
+    27,
+    7
+   ],
+   "total": 153
+  }
+ ]
+}; })(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<script>
+/* 計分引擎：全部為純函式，不讀取畫面、不依賴全域狀態。
+ * 輸入：rules（js/data/rulesXXXX.js）、state = { cat, answers, basics }
+ * answers[itemId] = 每個控制項一個值：check → 0/1；tier → 選項索引（-1 = 未選）；count → 整數；judged → 分數
+ * 總分永遠由 answers 重新計算，不累加畫面上的數字。
+ */
+(function (g) {
+  'use strict';
+  const SBS = (g.SBS = g.SBS || {});
+  const E = {};
+
+  const pv = (v, c) => (Array.isArray(v) ? v[c] : v);
+  const round = (x) => Math.round(x * 1000) / 1000; // 內部保留 3 位小數，避免 0.5 分累加的浮點誤差；顯示格式另訂
+  const isNum = (x) => typeof x === 'number' && isFinite(x);
+  E.pv = pv;
+  E.round = round;
+
+  /** 建築類別索引：無類別的版本（2024）固定為 0 */
+  E.catIndex = (rules, cat) => (rules.categories ? Math.max(0, cat | 0) : 0);
+  E.stateKey = (rules, cat) => (rules.categories ? rules.version + ':' + E.catIndex(rules, cat) : rules.version);
+
+  // ---------------------------------------------------------------- 控制項
+  E.controlMax = (ctrl, c) => {
+    switch (ctrl.type) {
+      case 'check': return pv(ctrl.points, c);
+      case 'tier': return Math.max.apply(null, ctrl.options.map((o) => o.points));
+      case 'count': return ctrl.unit * ctrl.max;
+      case 'judged': return ctrl.max;
+      case 'sys': return Math.max.apply(null, ctrl.tiers.map((t) => t[1]));
+      default: throw new Error('未知的控制項類型：' + ctrl.type);
+    }
+  };
+  E.controlDefault = (ctrl) => (ctrl.type === 'tier' ? -1 : 0);
+  /** 勾選系統（位元遮罩）：依勾選數落在哪個門檻換算分數 */
+  E.popcount = (n) => { let c = 0; for (let x = n; x > 0; x = Math.floor(x / 2)) c += x % 2; return c; };
+  E.sysCount = (ctrl, val) => (isNum(val) && val > 0 ? E.popcount(val % Math.pow(2, ctrl.systems.length)) : 0);
+  E.controlScore = (ctrl, val, c) => {
+    if (val === undefined || val === null) return 0;
+    switch (ctrl.type) {
+      case 'check': return val ? pv(ctrl.points, c) : 0;
+      case 'tier': return val >= 0 && val < ctrl.options.length ? ctrl.options[val].points : 0;
+      case 'count': return isNum(val) ? Math.min(Math.max(val, 0), ctrl.max) * ctrl.unit : 0;
+      case 'judged': return isNum(val) ? Math.min(Math.max(val, 0), ctrl.max) : 0;
+      case 'sys': { const n = E.sysCount(ctrl, val); let pts = 0; ctrl.tiers.forEach((t) => { if (n >= t[0]) pts = Math.max(pts, t[1]); }); return pts; }
+      default: return 0;
+    }
+  };
+  /** 將控制項設為「最高分情境」 */
+  E.controlTop = (ctrl) => {
+    switch (ctrl.type) {
+      case 'check': return 1;
+      case 'tier': {
+        let best = 0;
+        ctrl.options.forEach((o, i) => { if (o.points > ctrl.options[best].points) best = i; });
+        return best;
+      }
+      case 'count': case 'judged': return ctrl.max;
+      case 'sys': return Math.pow(2, ctrl.systems.length) - 1;
+      default: return 0;
+    }
+  };
+  E.controlValid = (ctrl, v) => {
+    switch (ctrl.type) {
+      case 'check': return v === 0 || v === 1;
+      case 'tier': return Number.isInteger(v) && v >= -1 && v < ctrl.options.length;
+      case 'count': case 'judged': return Number.isInteger(v) && v >= 0 && v <= ctrl.max;
+      case 'sys': return Number.isInteger(v) && v >= 0 && v < Math.pow(2, ctrl.systems.length);
+      default: return false;
+    }
+  };
+
+  // ---------------------------------------------------------------- 項目
+  E.itemMax = (item, c) => pv(item.max, c);
+  E.itemNA = (item, c) => {
+    if (pv(item.max, c) === 0) return { na: true, reason: (item.na && item.na[c]) || '本項於此類別不適用' };
+    return { na: false, reason: '' };
+  };
+  E.blankAnswer = (item) => item.controls.map(E.controlDefault);
+  E.itemRaw = (item, c, ans) => round(item.controls.reduce((a, ctrl, j) => a + E.controlScore(ctrl, ans ? ans[j] : undefined, c), 0));
+  E.itemScore = (item, c, ans) => Math.min(E.itemMax(item, c), E.itemRaw(item, c, ans));
+  /** 'na' | 'unassessed' | 'scored' | 'zero'（操作過但得 0 分 = 尚未達成） */
+  E.itemState = (item, c, ans) => {
+    if (E.itemNA(item, c).na) return 'na';
+    if (!ans) return 'unassessed';
+    return E.itemScore(item, c, ans) > 0 ? 'scored' : 'zero';
+  };
+  E.itemTop = (item) => item.controls.map(E.controlTop);
+
+  // ---------------------------------------------------------------- 等級
+  /**
+   * 等級判定。
+   * - 基本規定須全數符合才有任何等級。
+   * - basicOnly 的等級（2016 合格級）只看基本規定；其餘等級看分數。
+   */
+  E.gradeOf = (rules, total, basicsOk) => {
+    const levels = rules.grades.map((gr, i) => ({
+      index: i, name: gr.name, min: gr.min, basicOnly: !!gr.basicOnly,
+      reachedByScore: gr.basicOnly ? true : total >= gr.min,
+    }));
+    let byScore = -1; // 只看分數、不看基本規定時可達的最高等級
+    levels.forEach((l) => { if (l.reachedByScore) byScore = l.index; });
+    const level = basicsOk ? byScore : -1;
+    levels.forEach((l) => { l.achieved = basicsOk && l.reachedByScore; l.current = l.index === level; });
+    const nxt = levels.find((l) => !l.basicOnly && total < l.min);
+    return {
+      basicsOk, byScore, level,
+      name: level >= 0 ? levels[level].name : null,
+      scoreName: byScore >= 0 ? levels[byScore].name : null,
+      next: nxt ? { name: nxt.name, min: nxt.min, gap: round(nxt.min - total) } : null,
+      levels,
+    };
+  };
+
+  // ---------------------------------------------------------------- 基本規定
+  /** 指標在該類別適用的基本規定清單。有 ind.basics 時逐條列出；否則（舊資料格式）整個指標視為一條。 */
+  E.basicRules = (ind, c) => {
+    if (!ind.hasBasic || (ind.basicNA || []).includes(c)) return [];
+    return ind.basics && ind.basics.length ? ind.basics : [{ id: ind.id, text: '', legacy: true }];
+  };
+  /** 舊版儲存的「指標層級」勾選（basics['1']=true）展開為逐條勾選；不影響原物件 */
+  E.normalizeBasics = (rules, basics) => {
+    const out = Object.assign({}, basics || {});
+    rules.indicators.forEach((ind) => {
+      if (ind.basics && ind.basics.length && out[ind.id] === true) { ind.basics.forEach((b) => { out[b.id] = true; }); }
+      if (ind.basics && ind.basics.length) delete out[ind.id];
+    });
+    return out;
+  };
+
+  // ---------------------------------------------------------------- 全部計算
+  E.compute = (rules, st) => {
+    const c = E.catIndex(rules, st.cat);
+    const answers = st.answers || {};
+    const basics = E.normalizeBasics(rules, st.basics);
+    const items = {};
+    const inds = [];
+    const counts = { items: 0, unassessed: 0, scored: 0, zero: 0, pending: 0, na: 0 };
+    let total = 0, base = 0, bonus = 0, maxTotal = 0, baseMax = 0, bonusMax = 0, rawTotal = 0;
+    const missing = [];
+    let basicRequired = 0, basicDone = 0;
+
+    rules.indicators.forEach((ind) => {
+      const ir = { id: ind.id, name: ind.name, bonus: !!ind.bonus, groups: [], score: 0, raw: 0, max: 0, unassessed: 0, pending: 0, scored: 0, na: 0, items: 0 };
+      ind.groups.forEach((grp) => {
+        const cap = pv(grp.cap, c);
+        let sum = 0, sumMax = 0;
+        const ids = [];
+        grp.items.forEach((it) => {
+          ids.push(it.id);
+          const na = E.itemNA(it, c);
+          if (na.na) { items[it.id] = { id: it.id, state: 'na', reason: na.reason, score: 0, max: 0, raw: 0, pending: false }; counts.na++; ir.na++; return; }
+          const max = E.itemMax(it, c);
+          const ans = answers[it.id];
+          const raw = E.itemRaw(it, c, ans);
+          const score = Math.min(max, raw);
+          const state = E.itemState(it, c, ans);
+          const pending = it.status === 'review';
+          items[it.id] = { id: it.id, state, score, max, raw, pending, capped: raw > max };
+          sum += score; sumMax += max;
+          counts.items++; ir.items++;
+          counts[state]++;
+          if (state === 'unassessed') ir.unassessed++;
+          if (state === 'scored') ir.scored++;
+          if (pending) { counts.pending++; ir.pending++; }
+        });
+        const gScore = Math.min(cap, round(sum));
+        const gMax = Math.min(cap, sumMax);
+        const gr = { id: grp.id, name: grp.name, cap, max: gMax, raw: round(sum), score: gScore, capped: sum > cap, na: cap === 0 || ids.every((i) => items[i].state === 'na'), itemIds: ids };
+        ir.groups.push(gr);
+        ir.score = round(ir.score + gScore); ir.max += gMax; ir.raw = round(ir.raw + sum);
+      });
+      const brs = E.basicRules(ind, c);
+      const bstate = brs.map((b) => ({ id: b.id, done: !!basics[b.id] }));
+      ir.basic = { applicable: brs.length > 0, total: brs.length, doneCount: bstate.filter((b) => b.done).length, rules: bstate };
+      ir.basic.done = brs.length > 0 && ir.basic.doneCount === brs.length;
+      bstate.forEach((b) => { basicRequired++; if (b.done) basicDone++; else missing.push(b.id); });
+      total = round(total + ir.score); rawTotal = round(rawTotal + ir.raw); maxTotal += ir.max;
+      if (ir.bonus) { bonus = round(bonus + ir.score); bonusMax += ir.max; } else { base = round(base + ir.score); baseMax += ir.max; }
+      inds.push(ir);
+    });
+
+    const basicsOk = missing.length === 0;
+    return {
+      cat: c, indicators: inds, items, counts,
+      total, base, bonus, rawTotal, maxTotal, baseMax, bonusMax,
+      progress: maxTotal > 0 ? Math.min(1, total / maxTotal) : 0,
+      basics: { required: basicRequired, done: basicDone, missing, ok: basicsOk },
+      grade: E.gradeOf(rules, total, basicsOk),
+    };
+  };
+
+  // ---------------------------------------------------------------- 情境填寫
+  /** 回傳新的 answers：所有適用項目填成最高分情境。includeBonus=false 時略過加分指標。 */
+  E.fillAnswers = (rules, cat, opts) => {
+    const c = E.catIndex(rules, cat);
+    const out = {};
+    rules.indicators.forEach((ind) => {
+      if (ind.bonus && !(opts && opts.includeBonus)) return;
+      ind.groups.forEach((grp) => grp.items.forEach((it) => { if (!E.itemNA(it, c).na) out[it.id] = E.itemTop(it); }));
+    });
+    return out;
+  };
+  E.basicsAll = (rules, cat) => {
+    const c = E.catIndex(rules, cat);
+    const out = {};
+    rules.indicators.forEach((ind) => { E.basicRules(ind, c).forEach((b) => { out[b.id] = true; }); });
+    return out;
+  };
+
+  /** 逐一尋找項目 */
+  E.findItem = (rules, id) => {
+    for (const ind of rules.indicators) for (const grp of ind.groups) for (const it of grp.items) if (it.id === id) return { ind, grp, it };
+    return null;
+  };
+  E.allItems = (rules) => rules.indicators.flatMap((ind) => ind.groups.flatMap((grp) => grp.items.map((it) => ({ ind, grp, it }))));
+
+  /** 回傳新的 answers（不修改輸入）：把 item 的第 j 個控制項設為 value */
+  E.setControl = (rules, answers, itemId, j, value) => {
+    const f = E.findItem(rules, itemId);
+    if (!f) throw new Error('找不到項目：' + itemId);
+    const cur = answers[itemId] ? answers[itemId].slice() : E.blankAnswer(f.it);
+    cur[j] = value;
+    return Object.assign({}, answers, { [itemId]: cur });
+  };
+  E.resetItem = (answers, itemId) => { const o = Object.assign({}, answers); delete o[itemId]; return o; };
+
+  // ---------------------------------------------------------------- 驗證（匯入用）
+  E.validateAnswers = (rules, cat, answers) => {
+    const c = E.catIndex(rules, cat);
+    const errors = [];
+    const cleaned = {};
+    if (!answers || typeof answers !== 'object' || Array.isArray(answers)) return { ok: false, errors: ['answers 不是物件'], cleaned };
+    Object.keys(answers).forEach((id) => {
+      const f = E.findItem(rules, id);
+      let a = answers[id];
+      if (!f) { errors.push('未知項目：' + id); return; }
+      if (E.itemNA(f.it, c).na) { errors.push('項目 ' + id + ' 於此類別不適用，已忽略'); return; }
+      if (!Array.isArray(a) || a.length !== f.it.controls.length) { errors.push('項目 ' + id + ' 的作答格式不符'); return; }
+      if (!a.every((v, j) => E.controlValid(f.it.controls[j], v))) { errors.push('項目 ' + id + ' 含有超出範圍的值'); return; }
+      cleaned[id] = a.slice();
+    });
+    return { ok: errors.length === 0, errors, cleaned };
+  };
+  E.validateBasics = (rules, cat, basics) => {
+    const c = E.catIndex(rules, cat);
+    const errors = [];
+    const cleaned = {};
+    if (!basics || typeof basics !== 'object' || Array.isArray(basics)) return { ok: false, errors: ['basics 不是物件'], cleaned };
+    Object.keys(basics).forEach((id) => {
+      if (typeof basics[id] !== 'boolean') { errors.push('基本規定 ' + id + ' 的值須為布林'); return; }
+      // 舊格式：以指標編號勾選 → 展開成該指標的所有基本規定
+      const ind = rules.indicators.find((i) => i.id === id);
+      if (ind && ind.basics && ind.basics.length) { if (basics[id] && E.basicRules(ind, c).length) E.basicRules(ind, c).forEach((b) => { cleaned[b.id] = true; }); return; }
+      const owner = rules.indicators.find((i) => E.basicRules(i, c).some((b) => b.id === id));
+      if (!owner) { errors.push('基本規定 ' + id + ' 不存在或不適用，已忽略'); return; }
+      if (basics[id]) cleaned[id] = true;
+    });
+    return { ok: errors.length === 0, errors, cleaned };
+  };
+
+  /** 資料結構自我檢查（供測試與載入時使用） */
+  E.validateRules = (rules) => {
+    const errs = [];
+    const seen = new Set();
+    const ncat = rules.categories ? rules.categories.length : 1;
+    rules.indicators.forEach((ind) => ind.groups.forEach((grp) => {
+      for (let c = 0; c < ncat; c++) {
+        const cap = pv(grp.cap, c);
+        const sumMax = grp.items.reduce((a, it) => a + pv(it.max, c), 0);
+        if (sumMax < cap) errs.push(`群組 ${grp.id}（類別 ${c}）：子項合計 ${sumMax} 小於上限 ${cap}`);
+      }
+      grp.items.forEach((it) => {
+        if (seen.has(it.id)) errs.push('項目編號重複：' + it.id);
+        seen.add(it.id);
+        if (!it.controls || !it.controls.length) errs.push('項目 ' + it.id + ' 沒有控制項');
+        for (let c = 0; c < ncat; c++) {
+          const max = pv(it.max, c);
+          if (max === 0 && !(it.na && it.na[c])) errs.push(`項目 ${it.id}（類別 ${c}）為 0 分但沒有不適用原因`);
+          if (max > 0) {
+            const reach = it.controls.reduce((a, ctrl) => a + E.controlMax(ctrl, c), 0);
+            if (reach < max) errs.push(`項目 ${it.id}（類別 ${c}）：控制項最高 ${reach} 小於上限 ${max}`);
+          }
+        }
+      });
+    }));
+    return errs;
+  };
+
+  SBS.engine = E;
+  if (typeof module !== 'undefined') module.exports = E;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* 規則式取分建議：只產生建議，不修改任何作答。
+ * 重要：手冊沒有提供各項目的「施作難易度」，因此排序只依「可實際增加的分數」，
+ * 並明確標示難易度無法判定；需評定小組認定的項目排在後面。
+ */
+(function (g) {
+  'use strict';
+  const SBS = (g.SBS = g.SBS || {});
+  const E = g.SBS.engine || require('./engine.js');
+  const A = {};
+
+  const isJudged = (it) => it.controls.some((c) => c.type === 'judged');
+
+  /** 項目目前得分、最高分，以及若此項取滿分整體總分的實際增加量（含群組／項目上限） */
+  function candidates(rules, st, view) {
+    const c = view.cat;
+    const out = [];
+    E.allItems(rules).forEach(({ ind, grp, it }) => {
+      const info = view.items[it.id];
+      if (!info || info.state === 'na' || info.score >= info.max) return;
+      const trial = Object.assign({}, st.answers, { [it.id]: E.itemTop(it) });
+      const v2 = E.compute(rules, { cat: st.cat, answers: trial, basics: st.basics });
+      const gain = E.round(v2.total - view.total);
+      out.push({ it, ind, grp, info, gain, itemGain: E.round(info.max - info.score) });
+    });
+    return out;
+  }
+
+  function describe(rules, cand, view) {
+    const { it, ind, grp, info } = cand;
+    const steps = it.controls.map((ctrl, j) => {
+      switch (ctrl.type) {
+        case 'check': return ctrl.label ? ctrl.label : '符合本項要求';
+        case 'tier': { const top = ctrl.options[E.controlTop(ctrl)]; return '最高階：' + top.label; }
+        case 'sys': return ctrl.label + '：支援 ' + ctrl.tiers[ctrl.tiers.length - 1][0] + ' 項以上系統';
+        case 'count': return ctrl.label;
+        case 'judged': return ctrl.label;
+        default: return '';
+      }
+    });
+    const gr = view.indicators.find((i) => i.id === ind.id);
+    const reasons = [];
+    reasons.push('可增加 ' + cand.gain + ' 分（本項目前 ' + info.score + ' / ' + info.max + '）');
+    if (cand.gain < cand.itemGain) reasons.push('受群組／指標上限影響，實際只能增加 ' + cand.gain + ' 分');
+    reasons.push(ind.name + '指標目前 ' + gr.score + ' / ' + gr.max);
+    const caveats = [];
+    if (isJudged(it)) caveats.push('分數由評定小組認定，無法保證取得');
+    if (it.status === 'review') caveats.push(it.note || '本項規則待與手冊原文確認');
+    (it.hints || []).forEach((h) => caveats.push(h));
+    return {
+      id: it.id, text: it.text, indicator: ind.name, indicatorId: ind.id, group: grp.id + ' ' + grp.name,
+      current: info.score, max: info.max, gain: cand.gain, itemGain: cand.itemGain,
+      steps, reason: reasons.join('；'), caveats, ref: it.ref, judged: isJudged(it), pending: it.status === 'review',
+    };
+  }
+
+  // 需評定小組認定的項目一律排在後面（取分不確定），其餘依可增加分數、注意事項多寡、編號排序
+const rank = (a, b) => (a.judged - b.judged) || (b.gain - a.gain) || (a.caveats.length - b.caveats.length) || (a.id < b.id ? -1 : 1);
+
+  /**
+   * @param {object} opts { target: 等級索引（預設為下一個等級）}
+   */
+  A.suggest = (rules, st, opts) => {
+    const view = E.compute(rules, st);
+    const grade = view.grade;
+    let target = null;
+    if (opts && Number.isInteger(opts.target)) {
+      const l = grade.levels[opts.target];
+      if (l && !l.basicOnly) target = { name: l.name, min: l.min };
+    } else if (grade.next) target = { name: grade.next.name, min: grade.next.min };
+    const gap = target ? Math.max(0, E.round(target.min - view.total)) : 0;
+
+    const cands = candidates(rules, st, view).map((cd) => describe(rules, cd, view)).sort(rank);
+    const potential = E.round(rules.maxTotal ? view.maxTotal - view.total : 0);
+
+    // 以「每步取實際增加量最大者」逐步模擬，找出可補足缺口的最少項目組合（不寫入作答）
+    const plan = [];
+    let planAnswers = Object.assign({}, st.answers);
+    let planTotal = view.total;
+    if (target) {
+      const remaining = cands.map((x) => x.id);
+      let guard = 0;
+      while (planTotal < target.min && guard++ < 200) {
+        let best = null;
+        for (const id of remaining) {
+          const f = E.findItem(rules, id);
+          const trial = Object.assign({}, planAnswers, { [id]: E.itemTop(f.it) });
+          const t2 = E.compute(rules, { cat: st.cat, answers: trial, basics: st.basics }).total;
+          const gain = E.round(t2 - planTotal);
+          const meta = cands.find((x) => x.id === id);
+          if (gain <= 0) continue;
+          const better = !best || (meta.judged - best.meta.judged) < 0 || (meta.judged === best.meta.judged && gain > best.gain);
+          if (better) best = { id, gain, meta, trial, t2 };
+        }
+        if (!best) break;
+        plan.push(Object.assign({}, best.meta, { planGain: best.gain }));
+        planAnswers = best.trial; planTotal = best.t2;
+        remaining.splice(remaining.indexOf(best.id), 1);
+      }
+    }
+    return {
+      total: view.total, maxTotal: view.maxTotal, target, gap,
+      basics: view.basics, level: grade.name, scoreName: grade.scoreName,
+      reachable: !target || planTotal >= target.min, planTotal,
+      potential, items: cands, plan,
+      note: '手冊未提供各項目的施作難易度，本建議只依「可增加的分數」排序，並將需評定小組認定的項目排在後面；實際取分難度需由專業人員判斷。',
+    };
+  };
+
+  /** 套用單一項目的最高分情境；回傳新的 answers（呼叫端決定是否採用） */
+  A.applyItem = (rules, answers, itemId) => {
+    const f = E.findItem(rules, itemId);
+    if (!f) throw new Error('找不到項目：' + itemId);
+    return Object.assign({}, answers, { [itemId]: E.itemTop(f.it) });
+  };
+  A.applyMany = (rules, answers, ids) => ids.reduce((a, id) => A.applyItem(rules, a, id), answers);
+
+  SBS.advisor = A;
+  if (typeof module !== 'undefined') module.exports = A;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* 狀態儲存層：多專案、自動儲存（localStorage）、匯出入 JSON。
+ * storage 參數可注入（測試時使用假的 storage）。
+ * 注意：localStorage 只存在這個瀏覽器，不會自動備份或同步到其他裝置。
+ */
+(function (g) {
+  'use strict';
+  const SBS = (g.SBS = g.SBS || {});
+  const E = g.SBS.engine || require('./engine.js');
+  const S = {};
+
+  S.KEY = 'sbs.v2';
+  S.SCHEMA = 2;
+  S.FORMAT = 'smart-building-scoring';
+
+  const uid = () => 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+  S.newProject = (name, version) => ({
+    id: uid(), name: (name || '').trim() || '未命名專案', created: Date.now(), updated: Date.now(),
+    version: version || '2024', cat: 0, data: {},
+  });
+
+  S.emptyDb = () => {
+    const p = S.newProject('我的第一個專案');
+    return { schema: S.SCHEMA, active: p.id, projects: { [p.id]: p }, theme: '' };
+  };
+
+  /** 取得專案在「版本＋類別」下的資料（不存在則回傳空資料，不寫入） */
+  S.slice = (rules, project, cat) => {
+    const k = E.stateKey(rules, cat);
+    return (project.data && project.data[k]) || { answers: {}, basics: {}, evidence: {} };
+  };
+  S.withSlice = (rules, project, cat, slice) => {
+    const k = E.stateKey(rules, cat);
+    return Object.assign({}, project, { updated: Date.now(), data: Object.assign({}, project.data, { [k]: slice }) });
+  };
+
+  // ---------------------------------------------------------------- 讀寫
+  /** 1.1.2 曾短暫改為勾選系統（兩個位元遮罩），已還原為單選階梯：把遮罩依項數換回階梯索引 */
+  S.migrate = (db) => {
+    const pc = (n) => { let c = 0; for (let x = n; x > 0; x = Math.floor(x / 2)) c += x % 2; return c; };
+    Object.keys(db.projects || {}).forEach((pid) => {
+      const data = (db.projects[pid] || {}).data || {};
+      Object.keys(data).forEach((key) => {
+        const a = data[key] && data[key].answers && data[key].answers['1.1.2'];
+        if (key.indexOf('2024') === 0 && Array.isArray(a) && a.length === 2) {
+          const f = pc(a[0] || 0), c = pc(a[1] || 0);
+          const fi = f >= 12 ? 3 : f >= 9 ? 2 : f >= 6 ? 1 : f >= 3 ? 0 : -1, ci = c >= 6 ? 5 : c >= 3 ? 4 : -1;
+          const fp = fi >= 0 ? [2, 4, 6, 8][fi] : 0, cp = ci >= 0 ? [2, 4][ci - 4] : 0;
+          if (fp === 0 && cp === 0) delete data[key].answers['1.1.2'];
+          else data[key].answers['1.1.2'] = [fp >= cp ? fi : ci];
+        }
+      });
+    });
+  };
+  S.load = (storage) => {
+    try {
+      const raw = storage.getItem(S.KEY);
+      if (!raw) return { db: S.emptyDb(), error: null, fresh: true };
+      const db = JSON.parse(raw);
+      if (!db || db.schema !== S.SCHEMA || !db.projects || !db.active || !db.projects[db.active]) throw new Error('儲存格式不符');
+      S.migrate(db);
+      return { db, error: null, fresh: false };
+    } catch (e) {
+      return { db: S.emptyDb(), error: '讀取已儲存的資料失敗（' + e.message + '），已建立新的專案。', fresh: true };
+    }
+  };
+  S.save = (storage, db) => {
+    try {
+      storage.setItem(S.KEY, JSON.stringify(db));
+      return { ok: true, at: Date.now() };
+    } catch (e) {
+      return { ok: false, error: e && e.name === 'QuotaExceededError' ? '瀏覽器儲存空間不足' : '瀏覽器無法儲存（' + (e && e.message) + '）' };
+    }
+  };
+
+  // ---------------------------------------------------------------- 匯出入
+  S.exportProject = (project) => JSON.stringify({ format: S.FORMAT, schema: S.SCHEMA, exportedAt: new Date().toISOString(), project }, null, 1);
+
+  /**
+   * 驗證並匯入。回傳 { ok, project, errors, warnings }；有任何致命錯誤時不回傳 project，呼叫端不得改動目前資料。
+   * rulesMap：{ '2016': rules, '2024': rules }
+   */
+  S.parseImport = (text, rulesMap) => {
+    const errors = [], warnings = [];
+    let obj;
+    try { obj = JSON.parse(text); } catch (e) { return { ok: false, errors: ['檔案不是有效的 JSON'], warnings }; }
+    if (!obj || obj.format !== S.FORMAT) return { ok: false, errors: ['這不是本工具匯出的檔案（format 欄位不符）'], warnings };
+    if (obj.schema !== S.SCHEMA) return { ok: false, errors: ['不支援的資料版本：' + obj.schema + '（此工具為 ' + S.SCHEMA + '）'], warnings };
+    const p = obj.project;
+    if (!p || typeof p !== 'object') return { ok: false, errors: ['缺少 project 欄位'], warnings };
+    if (typeof p.name !== 'string' || !p.name.trim()) errors.push('專案名稱缺漏');
+    if (!rulesMap[p.version]) errors.push('未知的評估版本：' + p.version);
+    if (errors.length) return { ok: false, errors, warnings };
+    const rules = rulesMap[p.version];
+    const out = S.newProject(p.name, p.version);
+    out.created = Number.isFinite(p.created) ? p.created : Date.now();
+    const ncat = rules.categories ? rules.categories.length : 1;
+    out.cat = Number.isInteger(p.cat) && p.cat >= 0 && p.cat < ncat ? p.cat : 0;
+    if (!p.data || typeof p.data !== 'object' || Array.isArray(p.data)) return { ok: false, errors: ['缺少 data 欄位'], warnings };
+    Object.keys(p.data).forEach((key) => {
+      const m = key.match(/^(\d{4})(?::(\d+))?$/);
+      const r = m && rulesMap[m[1]];
+      const cat = m && m[2] ? +m[2] : 0;
+      if (!r || (r.categories ? !(m[2] && cat < r.categories.length) : !!m[2])) { warnings.push('略過無法辨識或未提供的資料：' + key); return; }
+      const sl = p.data[key] || {};
+      const va = E.validateAnswers(r, cat, sl.answers || {});
+      const vb = E.validateBasics(r, cat, sl.basics || {});
+      if (!va.ok || !vb.ok) warnings.push.apply(warnings, va.errors.concat(vb.errors).map((s) => key + '：' + s));
+      const ev = {};
+      Object.keys(sl.evidence || {}).forEach((id) => {
+        const e = sl.evidence[id];
+        if (e && typeof e === 'object') { const page = String(e.page || '').slice(0, 60), doc = String(e.doc || '').slice(0, 200); if (page || doc) ev[id] = { page, doc }; }
+      });
+      out.data[key] = { answers: va.cleaned, basics: vb.cleaned, evidence: ev };
+    });
+    if (errors.length) return { ok: false, errors, warnings };
+    return { ok: true, project: out, errors: [], warnings };
+  };
+
+  SBS.store = S;
+  if (typeof module !== 'undefined') module.exports = S;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* 介面層：只負責顯示與事件，所有分數都呼叫 SBS.engine 重新計算。 */
+(function () {
+  'use strict';
+  const SBS = window.SBS;
+  const E = SBS.engine, A = SBS.advisor, S = SBS.store;
+  // 目前只提供 2024 版（2016 版資料與引擎仍保留在 js/data/rules2016.js，需要時可在 index.html 重新載入並在此加回）
+  const RULES = { '2024': window.SBS_RULES['2024'] };
+  // 匯出／匯入只對管理者顯示（網址加 ?admin=1）；這只是介面隱藏，不是安全機制
+  const ADMIN = /[?&]admin(=|&|$)/.test(location.search);
+  const $ = (s, r) => (r || document).querySelector(s);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  // 顯示格式：整數不帶小數、其餘一位小數；內部計算保留 3 位
+  const F = (n) => (Number.isInteger(n) ? String(n) : (Math.round(n * 10) / 10).toFixed(1));
+  const pct = (a, b) => (b > 0 ? Math.max(0, Math.min(100, (a / b) * 100)) : 0);
+  const INC = window.SBS_INCENTIVE || null;
+  const ICONS = { 綜合佈線: '🔌', 資訊通信: '📡', 系統整合: '🔗', 設施管理: '🏗️', 安全防災: '🛡️', 節能管理: '⚡', 健康舒適: '💚', 智慧創新: '💡', 基礎設施: '🔌', 維運管理: '🏗️' };
+  const LV_ICON = ['✅', '🥉', '🥈', '🥇', '💎'];
+
+  // ---------------------------------------------------------------- 儲存
+  const mem = (() => { const m = {}; return { getItem: (k) => (k in m ? m[k] : null), setItem: (k, v) => { m[k] = v; } }; })();
+  let storage = mem, persistent = false;
+  try { const t = '__sbs_t'; localStorage.setItem(t, t); localStorage.removeItem(t); storage = localStorage; persistent = true; } catch (e) { /* 無法使用 localStorage */ }
+
+  const loaded = S.load(storage);
+  let db = loaded.db;
+  // 舊資料若屬於已停用的版本，改回 2024（原資料仍留在儲存空間內，不會被刪除）
+  Object.keys(db.projects).forEach((id) => { const p = db.projects[id]; if (!RULES[p.version]) db.projects[id] = Object.assign({}, p, { version: '2024', cat: 0 }); });
+  let saveSt = persistent ? { ok: true, at: null } : { ok: false, error: '此瀏覽器無法儲存資料（重新整理後會消失）' };
+  let undo = null, saveTimer = null;
+  const ui = { open: new Set(), detail: new Set(), fold: window.matchMedia('(max-width:760px)').matches, advice: null, sg: new Set() };
+
+  const proj = () => db.projects[db.active];
+  const rules = () => RULES[proj().version];
+  const sliceNow = () => S.slice(rules(), proj(), proj().cat);
+  const stateNow = () => { const s = sliceNow(); return { cat: proj().cat, answers: s.answers, basics: E.normalizeBasics(rules(), s.basics) }; };
+
+  function doSave() {
+    clearTimeout(saveTimer); saveTimer = null;
+    if (!persistent) { saveSt = { ok: false, error: '此瀏覽器無法儲存資料（重新整理後會消失）' }; renderTop(); return; }
+    const r = S.save(storage, db);
+    saveSt = r.ok ? { ok: true, at: r.at } : { ok: false, error: r.error };
+    renderTop();
+  }
+  function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(doSave, 200); }
+  window.addEventListener('beforeunload', () => { if (saveTimer) doSave(); });
+
+  /** 寫入目前版本＋類別的資料；undoable 時保留前一份供「復原」 */
+  function commit(slice, undoable) {
+    const p = proj();
+    if (undoable) undo = { id: p.id, version: p.version, cat: p.cat, slice: sliceNow() };
+    db.projects[p.id] = S.withSlice(rules(), p, p.cat, Object.assign({}, sliceNow(), slice));
+    ui.sg.clear();
+    scheduleSave(); render();
+  }
+  function setProject(patch) { db.projects[db.active] = Object.assign({}, proj(), patch, { updated: Date.now() }); scheduleSave(); render(); }
+
+  // ---------------------------------------------------------------- 提示與對話框
+  let tt = null;
+  function toast(msg, action) {
+    const t = $('#ts');
+    t.innerHTML = '<span>' + esc(msg) + '</span>' + (action ? '<button data-act="' + action.act + '">' + esc(action.label) + '</button>' : '');
+    t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), action ? 7000 : 3600);
+  }
+  function openDlg(id, title, body, foot) {
+    const d = $('#' + id);
+    d.innerHTML = '<div class="dh"><h2 id="' + id + 'T">' + esc(title) + '</h2><button class="bt sm" data-did="x" aria-label="關閉">關閉</button></div><div class="db">' + body + '</div>' + (foot ? '<div class="df">' + foot + '</div>' : '');
+    if (!d.open) d.showModal();
+    return d;
+  }
+  const closeDlg = (id) => { const d = $('#' + id); if (d.open) d.close(); };
+  /** 確認／輸入對話框，回傳 Promise：確認 → true（或輸入文字），取消 → null/false */
+  function ask(o) {
+    return new Promise((resolve) => {
+      const foot = '<button class="bt" data-did="no">' + esc(o.cancel || '取消') + '</button><button class="bt ' + (o.danger ? 'dng' : 'pri') + '" data-did="ok">' + esc(o.ok || '確定') + '</button>';
+      const body = (o.body || '') + (o.input ? '<p><label>' + esc(o.input.label) + '<br><input type="text" id="askIn" maxlength="60" value="' + esc(o.input.value || '') + '"></label></p>' : '');
+      const d = openDlg('dlg2', o.title, body, foot);
+      let done = false;
+      const fin = (v) => { if (done) return; done = true; d.removeEventListener('click', onClick); d.removeEventListener('close', onClose); if (d.open) d.close(); resolve(v); };
+      const onClick = (e) => {
+        const b = e.target.closest('[data-did]'); if (!b) return;
+        if (b.dataset.did === 'ok') fin(o.input ? ($('#askIn').value.trim() || null) : true); else fin(o.input ? null : false);
+      };
+      const onClose = () => fin(o.input ? null : false);
+      d.addEventListener('click', onClick); d.addEventListener('close', onClose);
+      if (o.input) setTimeout(() => { const i = $('#askIn'); if (i) i.select(); }, 0);
+    });
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('dialog [data-did="x"]'); if (b) b.closest('dialog').close();
+    if (e.target.tagName === 'DIALOG') e.target.close(); // 點背景關閉
+  });
+
+  // ---------------------------------------------------------------- 顯示：頂部
+  function renderTop() {
+    const p = proj();
+    $('#projBtn').textContent = '專案：' + p.name;
+    document.querySelectorAll('[data-act="ver"]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === p.version)));
+    const R = rules();
+    const row = $('#catRow');
+    row.hidden = !R.categories;
+    if (R.categories) $('#catSeg').innerHTML = R.categories.map((c, i) => '<button data-act="cat" data-v="' + i + '" aria-pressed="' + (i === p.cat) + '">' + esc(c.name) + '</button>').join('');
+    const s = $('#saveSt');
+    if (saveSt.ok) { s.className = 'savest'; s.textContent = saveSt.at ? '已儲存 ' + new Date(saveSt.at).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }) : '自動儲存已啟用'; }
+    else { s.className = 'savest err'; s.textContent = '⚠ 儲存失敗：' + saveSt.error; }
+    const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    $('#thm').textContent = dark ? '🌞' : '🌙';
+    document.title = '智慧建築標章計分工具 — ' + p.name;
+  }
+
+  // ---------------------------------------------------------------- 顯示：儀表板
+  const gcVar = (lv) => (lv >= 0 ? 'var(--g' + Math.min(lv, 4) + ')' : 'var(--mu)');
+  function gapText(view) {
+    const g = view.grade;
+    if (!view.basics.ok) {
+      let t = '基本規定尚有 <b>' + view.basics.missing.length + '</b> 條未符合';
+      if (g.scoreName && g.byScore >= 0 && !g.levels[g.byScore].basicOnly) t += '；分數已達「' + g.scoreName + '」，符合基本規定後即可取得';
+      return t;
+    }
+    if (g.next) return '距離「<b>' + esc(g.next.name) + '</b>」還需 <b>' + F(g.next.gap) + '</b> 分';
+    return '已達最高等級';
+  }
+  function renderDash(view, R) {
+    const g = view.grade, lv = g.level;
+    const d = $('#dash');
+    d.hidden = ui.fold;
+    $('#stick').classList.toggle('folded', ui.fold);
+    d.style.setProperty('--gc', gcVar(lv));
+    const r = 52, L = 2 * Math.PI * r, p = view.progress;
+    const ticks = R.grades.filter((x) => !x.basicOnly && x.min > 0).map((x) => {
+      const a = (x.min / R.maxTotal) * 2 * Math.PI - Math.PI / 2, c = Math.cos(a), s = Math.sin(a);
+      return '<line class="tk" x1="' + (70 + c * 45) + '" y1="' + (70 + s * 45) + '" x2="' + (70 + c * 60) + '" y2="' + (70 + s * 60) + '"><title>' + esc(x.name) + '　' + x.min + ' 分</title></line>';
+    }).join('');
+    const ring = '<svg viewBox="0 0 140 140" role="img" aria-label="目前總分 ' + F(view.total) + '，適用滿分 ' + view.maxTotal + '"><circle class="tr" cx="70" cy="70" r="' + r + '"/><circle class="pr" cx="70" cy="70" r="' + r + '" stroke-dasharray="' + (L * p) + ' ' + L + '" transform="rotate(-90 70 70)"/>' + ticks +
+      '<text class="big" x="70" y="73">' + F(view.total) + '</text><text class="sm" x="70" y="92">/ ' + view.maxTotal + ' 分</text></svg>';
+    const pillTxt = lv >= 0 ? LV_ICON[lv] + ' ' + g.name : (view.basics.ok ? '尚未達' + R.grades.find((x) => !x.basicOnly).name : '基本規定未完成');
+    const ladder = '<div class="ladder" role="img" aria-label="等級門檻進度"><i style="width:' + (p * 100) + '%"></i>' + R.grades.filter((x) => !x.basicOnly && x.min > 0).map((x) => '<u style="left:' + pct(x.min, R.maxTotal) + '%"><span>' + x.min + '</span></u>').join('') + '</div>';
+    const gmain = '<div class="gmain"><span class="pill">' + esc(pillTxt) + '</span><p>' + gapText(view) + '</p>' + ladder + '</div>';
+    const c = view.counts;
+    const stats = '<div class="stats">' +
+      '<div class="stat"><small>基本分數</small><b>' + F(view.base) + ' / ' + view.baseMax + '</b></div>' +
+      (view.bonusMax ? '<div class="stat"><small>加分</small><b>' + F(view.bonus) + ' / ' + view.bonusMax + '</b></div>' : '<div class="stat"><small>加分</small><b>無</b></div>') +
+      '<div class="stat"><small>適用滿分</small><b>' + view.maxTotal + '</b></div>' +
+      '<div class="stat"><small>基本規定</small><b>' + view.basics.done + ' / ' + view.basics.required + ' 條</b></div>' +
+      '<div class="stat"><small>尚未評估</small><b>' + c.unassessed + ' / ' + c.items + ' 項</b></div>' +
+      '</div>';
+    const bars = '<div class="bars">' + view.indicators.map((i) => '<div class="br"><span title="' + esc(i.name) + '">' + esc(i.name) + '</span><div class="bar' + (i.bonus ? ' bn' : '') + '"><b style="width:' + pct(i.score, i.max) + '%"></b></div><em>' + F(i.score) + ' / ' + i.max + '</em></div>').join('') + '</div>';
+    const chips = '<div class="chips">' + g.levels.map((l) => '<span class="chip' + (l.current ? ' cur' : l.achieved ? ' ok' : '') + '" style="--c:var(--g' + l.index + ')">' + LV_ICON[l.index] + ' ' + esc(l.name) + '<small>' + (l.basicOnly ? '符合基本規定' : '≥ ' + l.min + ' 分') + '</small>' + (INC && INC.levels[l.name] != null ? '<small class="inc">容積獎勵 ' + INC.levels[l.name] + '%</small>' : '') + (l.current ? '<em>目前</em>' : '') + '</span>').join('') + '</div>';
+    d.innerHTML = '<div class="ring">' + ring + '</div>' + gmain + stats + bars + chips;
+    const mini = $('#mini');
+    if (mini) mini.innerHTML = '<span class="num">' + F(view.total) + ' / ' + view.maxTotal + ' 分</span>　<span class="tag">' + esc(pillTxt) + '</span>';
+  }
+
+  // ---------------------------------------------------------------- 顯示：工具列
+  function renderToolbar() {
+    const R = rules();
+    $('#tb').innerHTML =
+      '<button class="bt" data-act="openAll">全部展開</button><button class="bt" data-act="closeAll">全部收合</button>' +
+      '<button class="bt pri" data-act="advice">取分建議</button>' +
+      '<button class="bt" data-act="fill0" title="勾選所有基本規定，並把非加分項目填到最高分（試算情境）">全勾選（不含加分）</button>' +
+      '<button class="bt" data-act="fill1" title="含加分項目，驗證絕對滿分（' + R.maxTotal + ' 分）">全勾選（全加分）</button>' +
+      '<button class="bt dng" data-act="clear">清除全部</button>' +
+      '<button class="bt" data-act="undo"' + (undo && undo.id === proj().id ? '' : ' disabled') + '>復原</button>' +
+      (ADMIN ? '<button class="bt" data-act="cases">案例對照</button><button class="bt" data-act="export">匯出</button><button class="bt" data-act="import">匯入</button><button class="bt" data-act="print">列印</button>' : '') +
+      '<button class="bt" data-act="fold" aria-expanded="' + !ui.fold + '">' + (ui.fold ? '▼ 展開儀表板' : '▲ 收折儀表板') + '</button><span class="mini" id="mini"></span>';
+  }
+
+  // ---------------------------------------------------------------- 顯示：項目與卡片
+  function controlHtml(it, j, ctrl, ans, view) {
+    const cur = ans ? ans[j] : undefined;
+    const c = view.cat;
+    const key = it.id + ':' + j;
+    if (ctrl.type === 'check') {
+      const pts = E.pv(ctrl.points, c);
+      return '<span class="pg"><button class="p" data-act="ctl" data-id="' + it.id + '" data-j="' + j + '" data-fk="p:' + key + '" aria-pressed="' + (cur === 1) + '" aria-label="' + esc(it.id + ' ' + (ctrl.label || '符合本項要求') + '，得 ' + pts + ' 分') + '" title="' + esc(ctrl.label || '符合本項要求') + '">+' + F(pts) + '</button></span>';
+    }
+    if (ctrl.type === 'tier') {
+      return '<span class="pg">' + ctrl.options.map((o, k) => '<button class="p" data-act="ctl" data-id="' + it.id + '" data-j="' + j + '" data-v="' + k + '" data-fk="p:' + key + ':' + k + '" aria-pressed="' + (cur === k) + '" aria-label="' + esc(it.id + ' ' + o.label + '，得 ' + o.points + ' 分') + '" title="' + esc(o.label) + '">+' + F(o.points) + '</button>').join('') + '</span>';
+    }
+    if (ctrl.type === 'sys') { const n = E.sysCount(ctrl, cur), pts = E.controlScore(ctrl, cur, c); return '<span class="sysum' + (pts > 0 ? ' on' : '') + '">' + esc(ctrl.label) + ' ' + n + ' 項 <b>+' + F(pts) + '</b></span>'; }
+    const v = cur || 0, max = ctrl.max, pts = E.controlScore(ctrl, v, c);
+    return '<span class="step' + (v > 0 ? ' on' : '') + '" role="group" aria-label="' + esc(ctrl.label) + '"><button data-act="ctl" data-id="' + it.id + '" data-j="' + j + '" data-d="-1" data-fk="s:' + key + ':-" aria-label="減少" ' + (v <= 0 ? 'disabled' : '') + '>−</button><output title="' + esc(ctrl.label) + '">+' + F(pts) + '</output><button data-act="ctl" data-id="' + it.id + '" data-j="' + j + '" data-d="1" data-fk="s:' + key + ':+" aria-label="增加" ' + (v >= max ? 'disabled' : '') + '>＋</button></span>';
+  }
+  const CASES = () => (ADMIN && window.SBS_CASES && window.SBS_CASES['2024']) || null;
+  function caseLine(it, view) {
+    const C = CASES(); if (!C) return '';
+    const P = presetOf(rules()), ex = P && P.answers[it.id] ? E.itemScore(it, view.cat, P.answers[it.id]) : 0;
+    return '<p class="cs"><b>案例取分</b>（上限 ' + F(it.max) + '）：' + C.cases.map((c) => '案例 ' + c.id + ' <b>' + F(c.scores[it.id] || 0) + '</b>').join('　') + '　專家建議 <b>' + F(ex) + '</b></p>';
+  }
+  function casesDlg() {
+    const C = CASES(), R = rules(), P = presetOf(R), st = stateNow(), cat = st.cat; if (!C) return;
+    const cell = (v, mx) => '<td class="n' + (v > 0 ? (v >= mx ? ' full' : ' got') : ' z') + '">' + (v > 0 ? F(v) : '–') + '</td>';
+    let body = '<p class="mu">' + esc(C.note) + '</p><div class="tw"><table class="ct"><thead><tr><th>項目</th><th>上限</th><th>專家 117</th>' + C.cases.map((c) => '<th title="' + esc(c.label) + '">案例 ' + c.id + '<small>' + (c.partial ? '部分項目' : F(c.total) + ' 分') + '</small></th>').join('') + '<th>案例取分數</th></tr></thead><tbody>';
+    R.indicators.forEach((ind) => {
+      const its = ind.groups.flatMap((g) => g.items), exs = its.map((it) => (P && P.answers[it.id] ? E.itemScore(it, cat, P.answers[it.id]) : 0));
+      body += '<tr class="ih"><td colspan="2">' + esc(ind.name) + '</td><td class="n">' + F(exs.reduce((a, b) => a + b, 0)) + '</td>' + C.cases.map((c) => '<td class="n">' + F(its.reduce((a, it) => a + (c.scores[it.id] || 0), 0)) + '</td>').join('') + '<td></td></tr>';
+      its.forEach((it, i) => {
+        const taken = C.cases.filter((c) => (c.scores[it.id] || 0) > 0).length;
+        body += '<tr><td><span class="id">' + it.id + '</span> ' + esc(it.text.length > 26 ? it.text.slice(0, 26) + '…' : it.text) + '</td><td class="n">' + F(it.max) + '</td>' + cell(exs[i], it.max) + C.cases.map((c) => cell(c.scores[it.id] || 0, it.max)).join('') + '<td class="n">' + taken + ' / ' + C.cases.length + '</td></tr>';
+      });
+    });
+    body += '</tbody></table></div>';
+    openDlg('dlg', '案例對照（管理者模式）', body);
+  }
+  function lessonsOf(id) {
+    const L = window.SBS_LESSONS && window.SBS_LESSONS['2024'], RV = window.SBS_REVIEW && window.SBS_REVIEW['2024'];
+    return { remind: ((RV && RV.items[id]) || []).concat((L && L.remind[id]) || []), did: (L && L.did[id]) || [] };
+  }
+  function reviewHtml(id) {
+    const x = lessonsOf(id);
+    return (x.remind.length ? '<div class="rv"><b>提醒</b><ul>' + x.remind.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul></div>' : '') +
+      (x.did.length ? '<div class="rv dd"><b>案例做法</b><ul>' + x.did.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul></div>' : '');
+  }
+  function evHtml(id) {
+    const e = (sliceNow().evidence || {})[id] || {};
+    return '<div class="evd"><label>對應頁次<input type="text" data-act="ev" data-f="page" data-id="' + id + '" value="' + esc(e.page || '') + '" placeholder="例：P.12" maxlength="60"></label><label>對應書圖名稱<input type="text" data-act="ev" data-f="doc" data-id="' + id + '" value="' + esc(e.doc || '') + '" placeholder="例：電信佈線平面圖" maxlength="200"></label></div>';
+  }
+  function detailHtml(it, view) {
+    const parts = [];
+    if (it.rule) parts.push('<p><b>手冊給分規定</b>：' + esc(it.rule) + '</p>');
+    const P = presetOf(rules());
+    if (P && P.why[it.id]) parts.push('<p class="why"><b>專家建議取 +' + F(E.itemScore(it, view.cat, P.answers[it.id])) + ' 分</b>：' + esc(P.why[it.id]) + '</p>');
+    if (ADMIN) parts.push('<p><b>出處</b>：' + esc(it.ref) + '（PDF 第 ' + it.pdfPage + ' 頁）</p>');
+    if (it.note) parts.push('<p class="wn">說明：' + esc(it.note) + '</p>');
+    parts.push(caseLine(it, view)); parts.push(reviewHtml(it.id)); parts.push(evHtml(it.id));
+    return '<div class="det">' + parts.join('') + '</div>';
+  }
+  function sysPicker(it, ans) {
+    return it.controls.map((ctrl, j) => ctrl.type !== 'sys' ? '' : '<div class="sysg"><b>' + esc(ctrl.label) + '</b><span class="sysc">' + ctrl.tiers.map((t) => t[0] + ' 項＝' + t[1] + ' 分').join('、') + '</span><div class="sysbs">' + ctrl.systems.map((n, k) => {
+      const on = ans && Number.isInteger(ans[j]) && Math.floor(ans[j] / Math.pow(2, k)) % 2 === 1;
+      return '<button class="ysb' + (on ? ' on' : '') + '" data-act="sys" data-id="' + it.id + '" data-j="' + j + '" data-b="' + k + '" data-fk="y:' + it.id + ':' + j + ':' + k + '" aria-pressed="' + on + '">' + esc(n) + '</button>';
+    }).join('') + '</div></div>').join('');
+  }
+  /** 有階梯或多個勾選的項目：把每個選項連同條件文字列出來（像單選／複選清單），不再只剩「+分數」按鈕 */
+  const listy = (it) => it.controls.length > 1 || it.controls.some((c) => c.type === 'tier') || it.controls[0].type === 'check';
+  function optsHtml(it, ans, view) {
+    const c = view.cat;
+    const rowBtn = (j, k, kind, label, pts, on) => '<button class="opt' + (on ? ' on' : '') + '" data-act="ctl" data-id="' + it.id + '" data-j="' + j + (k === null ? '' : '" data-v="' + k) + '" data-fk="p:' + it.id + ':' + j + (k === null ? '' : ':' + k) + '" aria-pressed="' + on + '" aria-label="' + esc(it.id + ' ' + label + '，得 ' + pts + ' 分') + '"><i class="' + kind + '"></i><span class="ol">' + esc(label) + '</span><b>+' + F(pts) + ' 分</b></button>';
+    return '<div class="opts">' + it.controls.map((ctrl, j) => {
+      const cur = ans ? ans[j] : undefined;
+      if (ctrl.type === 'tier') return ctrl.options.map((o, k) => rowBtn(j, k, 'rd', o.label, o.points, cur === k)).join('');
+      if (ctrl.type === 'check') { let lb = ctrl.label || '符合本項要求'; if (it.controls.length === 1 && lb.length > 40) lb = '符合本項要求'; else if (lb.length > 60) { const s = lb.split('。')[0]; lb = s && s.length <= 60 ? s + '。' : lb.slice(0, 56) + '…'; } return rowBtn(j, null, 'ck', lb, E.pv(ctrl.points, c), cur === 1); }
+      const v = cur || 0, pts = E.controlScore(ctrl, v, c);
+      return '<div class="optc"><span class="ol">' + esc(ctrl.label) + '</span>' + controlHtml(it, j, ctrl, ans, view) + '</div>';
+    }).join('') + '</div>';
+  }
+  function itemHtml(it, view, st) {
+    const info = view.items[it.id], ans = st.answers[it.id], d = ui.detail.has(it.id), P0 = presetOf(rules());
+    const b = [];
+    const why = P0 && P0.why[it.id] && JSON.stringify(ans) === JSON.stringify(P0.answers[it.id]);
+    if (info.state === 'scored') { if (!why) b.push('<span class="badge ok">✓ 已取得 ' + F(info.score) + ' 分</span>'); }
+    else if (info.state === 'zero') b.push('<span class="badge zero">✕ 尚未達成</span>');
+    else b.push('<span class="badge">○ 尚未評估</span>');
+    { const lx = lessonsOf(it.id); if (lx.remind.length || lx.did.length) b.push('<span class="badge rvb" title="展開可看提醒與案例做法">提醒</span>'); }
+    if (info.capped) b.push('<span class="badge cap">已截至項目上限 ' + F(info.max) + ' 分</span>');
+    return '<div class="it"><span class="id">' + it.id + '</span><div><button class="txb' + (d ? ' op' : '') + '" data-act="detail" data-id="' + it.id + '" data-fk="d:' + it.id + '" aria-expanded="' + d + '"><span class="t">' + esc(it.text) + '</span></button>' +
+      '<div class="st">' + b.join('') + '<button class="rst" data-act="detail" data-id="' + it.id + '">' + (d ? '收合說明' : '查看給分條件') + '</button>' + (ans ? '<button class="rst" data-act="rst" data-id="' + it.id + '">重設此項</button>' : '') + '</div>' + (listy(it) ? optsHtml(it, ans, view) : '') + sysPicker(it, ans) + (d ? detailHtml(it, view) : '') + '</div>' +
+      (listy(it) ? '' : '<div class="pl">' + it.controls.map((ctrl, j) => controlHtml(it, j, ctrl, ans, view)).join('') + '</div>') + '</div>';
+  }
+  function basicRowHtml(b, view) {
+    const rs = view.indicators.flatMap((i) => i.basic.rules).find((r) => r.id === b.id), d = ui.detail.has('b' + b.id);
+    return '<div class="it bs"><span class="id">' + b.id + '</span><div><button class="txb' + (d ? ' op' : '') + '" data-act="detail" data-id="b' + b.id + '" data-fk="d:b' + b.id + '" aria-expanded="' + d + '"><span class="t">' + esc(b.text) + '</span></button><div class="st"><span class="badge bsb">基本規定・不計分</span>' + ((lessonsOf(b.id).remind.length || lessonsOf(b.id).did.length) ? '<span class="badge rvb">提醒</span>' : '') + '<button class="rst" data-act="detail" data-id="b' + b.id + '">' + (d ? '收合說明' : '查看完整內容') + '</button></div>' + (d ? '<div class="det"><p>' + esc(b.text) + '</p>' + (ADMIN ? '<p><b>出處</b>：' + esc(b.ref) + '（PDF 第 ' + b.pdfPage + ' 頁）</p>' : '') + reviewHtml(b.id) + evHtml(b.id) + '</div>' : '') + '</div>' +
+      '<div class="pl"><label class="basic"><input type="checkbox" data-act="basic" data-id="' + b.id + '" data-fk="b:' + b.id + '"' + (rs && rs.done ? ' checked' : '') + '> 符合</label></div></div>';
+  }
+  function groupHtml(grp, ind, view, st) {
+    const gr = view.indicators.find((i) => i.id === ind.id).groups.find((x) => x.id === grp.id);
+    const act = grp.items.filter((it) => view.items[it.id].state !== 'na');
+    const nas = grp.items.filter((it) => view.items[it.id].state === 'na');
+    let h = '<div class="gh"><b>' + grp.id + '　' + esc(grp.name) + '</b><span>' + (gr.na ? '本類別不適用' : F(gr.score) + ' / ' + F(gr.max) + (gr.capped ? '（已達群組上限）' : '')) + '</span></div>';
+    const cmp = (a, b) => { const x = a.id.split('.').map(Number), y = b.id.split('.').map(Number); for (let i = 0; i < Math.max(x.length, y.length); i++) { const d = (x[i] || 0) - (y[i] || 0); if (d) return d; } return 0; };
+    const rows = (ind.basics || []).filter((b) => b.id.indexOf(grp.id + '.') === 0).map((b) => ({ id: b.id, h: () => basicRowHtml(b, view) }))
+      .concat(act.map((it) => ({ id: it.id, h: () => itemHtml(it, view, st) }))).sort(cmp);
+    h += rows.map((r) => r.h()).join('');
+    if (nas.length) h += '<details class="na-box"><summary>不適用項目（' + nas.length + '）</summary><ul>' + nas.map((it) => '<li><span class="num">' + it.id + '</span> ' + esc(it.text.length > 50 ? it.text.slice(0, 50) + '…' : it.text) + ' —— ' + esc(view.items[it.id].reason) + '</li>').join('') + '</ul></details>';
+    return h;
+  }
+  function renderCards(view, R, st) {
+    $('#cards').innerHTML = R.indicators.map((ind) => {
+      const ir = view.indicators.find((i) => i.id === ind.id), open = ui.open.has(ind.id);
+      let basic;
+      if (ir.basic.applicable) basic = '<label class="basic"><input type="checkbox" data-act="basicAll" data-id="' + ind.id + '" data-fk="ba:' + ind.id + '"' + (ir.basic.done ? ' checked' : '') + (ir.basic.doneCount > 0 && !ir.basic.done ? ' data-part="1"' : '') + '> 基本規定 ' + ir.basic.doneCount + ' / ' + ir.basic.total + (ir.basic.done ? ' ✓' : '') + '</label>';
+      else if (ind.hasBasic) basic = '<span class="basic na">基本規定：此類別不適用</span>';
+      else basic = '<span class="basic na">無基本規定</span>';
+      return '<section class="card"><div class="ch"><button class="ib" data-act="ind" data-id="' + ind.id + '" data-fk="i:' + ind.id + '" aria-expanded="' + open + '"><span class="ar">' + (open ? '▾' : '▸') + '</span>' + (ICONS[ind.name] || '') + ' ' + ind.id + '　' + esc(ind.name) + (ind.bonus ? ' <span class="tagb">加分</span>' : '') + '</button>' +
+        '<span class="isc">' + F(ir.score) + ' / ' + ir.max + '</span><div class="bar grow' + (ind.bonus ? ' bn' : '') + '"><b style="width:' + pct(ir.score, ir.max) + '%"></b></div><span class="imeta">未評估 ' + ir.unassessed + '' + '</span>' + basic + '</div>' +
+        (open ? '<div class="cb">' + ind.groups.map((grp) => groupHtml(grp, ind, view, st)).join('') + '</div>' : '') + '</section>';
+    }).join('');
+    document.querySelectorAll('input[data-part]').forEach((i) => { i.indeterminate = true; });
+  }
+
+  // ---------------------------------------------------------------- 建議面板
+  function advancedHtml(R, st) {
+    const sg = A.suggest(R, st, { target: ui.advice.target });
+    const lv = R.grades.map((g, i) => ({ g, i })).filter((x) => !x.g.basicOnly);
+    const sel = '<label>目標等級　<select data-act="advTarget" aria-label="目標等級"><option value="">下一個等級</option>' + lv.map((x) => '<option value="' + x.i + '"' + (ui.advice.target === x.i ? ' selected' : '') + '>' + esc(x.g.name) + '（≥ ' + x.g.min + ' 分）</option>').join('') + '</select></label>';
+    let sum;
+    if (!sg.target) sum = '目前總分 <b>' + F(sg.total) + '</b> 分，已達最高等級或所選等級。';
+    else if (sg.gap <= 0) sum = '目前總分 <b>' + F(sg.total) + '</b> 分，已達「' + esc(sg.target.name) + '」門檻（≥ ' + sg.target.min + ' 分）。';
+    else sum = '目前總分 <b>' + F(sg.total) + '</b> 分；目標「' + esc(sg.target.name) + '」≥ ' + sg.target.min + ' 分，還差 <b>' + F(sg.gap) + '</b> 分。' + (sg.reachable ? '' : '<br><b>即使全部項目取滿分也無法達到此門檻。</b>');
+    const warn = sg.basics.ok ? '' : '<div class="warnb">基本規定尚有 ' + sg.basics.missing.length + ' 條未符合；未全數符合前，不論分數多少都無法取得等級。</div>';
+    const li = (x, planned) => '<li><div class="hd"><b class="num">' + x.id + '</b><span class="gain">+' + F(planned ? x.planGain : x.gain) + ' 分</span><span class="imeta">' + esc(x.indicator) + '・' + esc(x.group) + '</span></div><p>' + esc(x.text.length > 90 ? x.text.slice(0, 90) + '…' : x.text) + '</p><p>取分方式：' + x.steps.map(esc).join('；') + '</p><p>選擇原因：' + esc(x.reason) + '</p>' + (x.caveats.length ? '<p class="cv">注意：' + x.caveats.map(esc).join('；') + '</p>' : '') + '<div class="acts"><button class="bt sm" data-act="advApply" data-id="' + x.id + '">只套用這一項</button></div></li>';
+    const plan = sg.plan.length ? '<h3>建議補強（共 ' + sg.plan.length + ' 項，依序補足缺口）</h3><ol>' + sg.plan.map((x) => li(x, true)).join('') + '</ol><div class="acts"><button class="bt pri" data-act="advApplyAll">套用以上全部建議（可復原）</button></div>' : '';
+    const others = sg.items.filter((x) => !sg.plan.some((p) => p.id === x.id)).slice(0, 12);
+    const more = others.length ? '<details class="na-box"><summary>其他可取分項目（前 ' + others.length + ' 項）</summary><ol style="margin-top:8px">' + others.map((x) => li(x, false)).join('') + '</ol></details>' : '';
+    return '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><h3>依目標等級計算補強項目</h3><div>' + sel + '</div></div><p class="sum">' + sum + '</p>' + warn + plan + more + '<p class="note">' + esc(sg.note) + '「套用」只會把該項填為最高分情境，不代表工程已符合要求。</p>';
+  }
+
+  function presetOf(R) { return (window.SBS_PRESET && window.SBS_PRESET[R.version]) || null; }
+  function renderAdvice() {
+    const host = $('#adviceHost');
+    if (!ui.advice) { host.innerHTML = ''; return; }
+    const R = rules(), st = stateNow(), P = presetOf(R);
+    if (!P) { host.innerHTML = '<section class="advice" aria-label="取分建議"><div style="display:flex;justify-content:space-between"><h2>取分建議</h2><button class="bt sm" data-act="advClose">關閉</button></div>' + advancedHtml(R, st) + '</section>'; return; }
+    const pv = E.compute(R, { cat: st.cat, answers: P.answers, basics: E.basicsAll(R, st.cat) });
+    const cur = E.compute(R, st);
+    const same = (id) => JSON.stringify(st.answers[id]) === JSON.stringify(P.answers[id]);
+    const rows = R.indicators.map((ind) => {
+      const its = ind.groups.flatMap((g) => g.items).filter((it) => P.answers[it.id]);
+      if (!its.length) return '';
+      const sub = its.reduce((t, it) => t + pv.items[it.id].score, 0);
+      return '<h3>' + esc(ind.id + ' ' + ind.name) + '<small>　' + F(sub) + ' 分</small></h3><ul class="pset">' + its.map((it) => '<li><b class="num">' + it.id + '</b><span class="tx">' + esc(it.text.length > 56 ? it.text.slice(0, 56) + '…' : it.text) + (P.notes[it.id] ? '<em class="cv"> ⚠ ' + esc(P.notes[it.id]) + '</em>' : '') + '</span><span class="gain">+' + F(pv.items[it.id].score) + (pv.items[it.id].score < E.itemMax(it, st.cat) ? ' / ' + E.itemMax(it, st.cat) : '') + '</span>' + (same(it.id) ? '<span class="badge ok">已填入</span>' : '') + '</li>').join('') + '</ul>';
+    }).join('');
+    const matched = Object.keys(P.answers).filter(same).length;
+    const sum = '這組建議共 <b>' + Object.keys(P.answers).length + '</b> 項、<b>' + F(pv.total) + '</b> 分，等級為「' + esc(pv.grade.name) + '」（基本規定需全數符合）。你目前 <b>' + F(cur.total) + '</b> 分，其中 ' + matched + ' 項已與建議相同。';
+    host.innerHTML = '<section class="advice" aria-label="取分建議"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><h2>取分建議：' + F(pv.total) + ' 分組合</h2><button class="bt sm" data-act="advClose">關閉</button></div><p class="sum">' + sum + '</p><div class="acts"><button class="bt pri" data-act="advPreset">套用這組建議（取代目前勾選，可復原）</button></div>' + rows + '<p class="note">來源：' + esc(P.source) + '。「套用」會把這些項目填為建議分數並標示基本規定符合，是試算情境，不代表工程已符合要求。</p><details class="na-box"><summary>其他：依目標等級計算補強項目</summary>' + advancedHtml(R, st) + '</details></section>';
+  }
+
+  function renderNote() {
+    $('#vnote').innerHTML = ''  +
+      (INC ? '<details class="incd"><summary>都更危老容積獎勵（依候選等級證書）</summary><table><tr>' + Object.keys(INC.levels).map((k) => '<th>' + esc(k) + '</th>').join('') + '</tr><tr>' + Object.keys(INC.levels).map((k) => '<td>基準容積 ' + INC.levels[k] + '%</td>').join('') + '</tr></table><ul>' + INC.notes.map((n) => '<li>' + esc(n) + '</li>').join('') + '</ul><p class="mu">來源：<a href="' + INC.url + '" target="_blank" rel="noopener">' + esc(INC.source) + '</a></p></details>' : '');
+  }
+
+  function render() {
+    const ae = document.activeElement;
+    const fk = ae && ae.dataset ? ae.dataset.fk : null;
+    const R = rules(), st = stateNow(), view = E.compute(R, st);
+    renderTop(); renderToolbar(); renderDash(view, R); renderAdvice(); renderCards(view, R, st);
+    $('#foot').innerHTML = '資料來源：' + esc(R.source) + '。「基本規定」不計分，須全數符合才能取得等級；本工具為評估規劃與試算輔助，不代表主管機關或評定機構的正式審查結果。資料存在這個瀏覽器的 localStorage，不會自動備份，也不會同步到其他裝置，' + (ADMIN ? '請定期「匯出」。' : '請自行留存重要結果（例如截圖）。');
+    if (fk) { const el = document.querySelector('[data-fk="' + (window.CSS && CSS.escape ? CSS.escape(fk) : fk) + '"]'); if (el) el.focus({ preventScroll: true }); }
+  }
+
+  // ---------------------------------------------------------------- 報表
+  function buildReport() {
+    const R = rules(), p = proj(), st = stateNow(), view = E.compute(R, st);
+    const cat = R.categories ? R.categories[p.cat].name : '（本版不分建築類別）';
+    const sg = A.suggest(R, st);
+    const rows = view.indicators.map((i) => '<tr><td>' + i.id + ' ' + esc(i.name) + (i.bonus ? '（加分）' : '') + '</td><td class="n">' + F(i.score) + '</td><td class="n">' + i.max + '</td><td class="n">' + i.unassessed + '</td><td>' + (i.basic.applicable ? (i.basic.done ? '已符合' : '未勾選') : '—') + '</td></tr>').join('');
+    const unfinished = view.indicators.filter((i) => i.score < i.max).map((i) => '<li>' + esc(i.name) + '：尚差 ' + F(i.max - i.score) + ' 分（' + i.groups.filter((g) => !g.na && g.score < g.max).map((g) => g.id + ' ' + esc(g.name)).join('、') + '）</li>').join('');
+    const gap = sg.target ? (sg.gap > 0 ? '距離「' + esc(sg.target.name) + '」（≥ ' + sg.target.min + ' 分）還差 ' + F(sg.gap) + ' 分。' : '已達「' + esc(sg.target.name) + '」門檻。') : '已達最高等級。';
+    const plan = sg.plan.length ? '<ol>' + sg.plan.map((x) => '<li>' + x.id + ' ' + esc(x.text.slice(0, 50)) + '（+' + F(x.planGain) + ' 分）</li>').join('') + '</ol>' : '';
+    $('#report').innerHTML = '<h1>智慧建築標章試算摘要</h1><p class="meta">專案：' + esc(p.name) + '　版本：' + esc(R.label) + '　建築類別：' + esc(cat) + '　試算日期：' + new Date().toLocaleDateString('zh-TW') + '</p>' +
+      '<h2>總覽</h2><table><tr><th>目前總分</th><td class="n">' + F(view.total) + '</td><th>適用滿分</th><td class="n">' + view.maxTotal + '</td><th>基本分數</th><td class="n">' + F(view.base) + ' / ' + view.baseMax + '</td><th>加分</th><td class="n">' + (view.bonusMax ? F(view.bonus) + ' / ' + view.bonusMax : '無') + '</td></tr><tr><th>目前等級</th><td colspan="3">' + esc(view.grade.name || (view.basics.ok ? '尚未達合格級' : '基本規定未完成')) + '</td><th>基本規定</th><td colspan="3">' + view.basics.done + ' / ' + view.basics.required + ' 項指標已勾選</td></tr></table>' +
+      '<h2>標章等級門檻</h2><p class="meta">' + R.grades.map((g) => esc(g.name) + (g.basicOnly ? '（符合所有基本規定）' : '（≥ ' + g.min + ' 分）')).join('　') + '</p>' +
+      '<h2>各指標得分</h2><table><tr><th>指標</th><th>得分</th><th>上限</th><th>未評估</th><th>基本規定</th></tr>' + rows + '</table>' +
+      '<h2>尚未完成的指標</h2>' + (unfinished ? '<ul>' + unfinished + '</ul>' : '<p class="meta">各指標皆已取滿分。</p>') +
+      '<h2>達標缺口與補強建議</h2><p class="meta">' + gap + '</p>' + plan + '<p class="dis">' + esc(sg.note) + ' 本摘要為評估規劃與試算輔助，不等同主管機關或評定機構的正式審查結果。</p>';
+  }
+  window.addEventListener('beforeprint', buildReport);
+
+  // ---------------------------------------------------------------- 專案對話框
+  function projectsDlg() {
+    const list = Object.values(db.projects).sort((a, b) => b.updated - a.updated);
+    const body = '<ul class="plist">' + list.map((p) => '<li class="' + (p.id === db.active ? 'cur' : '') + '"><span class="nm">' + esc(p.name) + (p.id === db.active ? '（目前）' : '') + '</span><small>' + esc(RULES[p.version].label) + '・' + new Date(p.updated).toLocaleString('zh-TW', { hour12: false }) + '</small>' +
+      (p.id !== db.active ? '<button class="bt sm" data-act="pSwitch" data-id="' + p.id + '">切換</button>' : '') + '<button class="bt sm" data-act="pRename" data-id="' + p.id + '">改名</button><button class="bt sm dng" data-act="pDelete" data-id="' + p.id + '">刪除</button></li>').join('') + '</ul>' +
+      '<p><label>新增專案<br><input type="text" id="newName" maxlength="60" placeholder="專案名稱"></label></p><p>各專案、各版本與各建築類別的勾選分開保存。</p>';
+    openDlg('dlg', '專案管理', body, (ADMIN ? '<button class="bt" data-act="export">匯出目前專案</button><button class="bt" data-act="import">匯入專案</button>' : '') + '<button class="bt pri" data-act="pNew">新增專案</button>');
+  }
+  function exportDlg() {
+    const txt = S.exportProject(proj());
+    openDlg('dlg', '匯出目前專案', '<p>下列 JSON 包含「' + esc(proj().name) + '」所有版本與類別的勾選。可下載檔案，或直接複製後自行保存。</p><textarea id="expTxt" readonly>' + esc(txt) + '</textarea>', '<button class="bt" data-act="copyExp">複製</button><button class="bt pri" data-act="dlExp">下載檔案</button>');
+  }
+  function importDlg() {
+    openDlg('dlg', '匯入專案', '<p>選擇先前匯出的 JSON 檔，或把內容貼在下方。匯入會建立<b>新的專案</b>，不會覆蓋目前資料；格式錯誤時不會改動任何資料。</p><p><input type="file" id="impFile" accept=".json,application/json" aria-label="選擇檔案"></p><textarea id="impTxt" aria-label="貼上 JSON" placeholder="在此貼上匯出的 JSON"></textarea><div id="impMsg"></div>', '<button class="bt pri" data-act="doImport">匯入</button>');
+    $('#impFile').addEventListener('change', (e) => { const f = e.target.files[0]; if (!f) return; const rd = new FileReader(); rd.onload = () => { $('#impTxt').value = String(rd.result); }; rd.readAsText(f); });
+  }
+  function helpDlg() {
+    openDlg('dlg', '使用說明', '<p>本工具依《智慧建築評估手冊》2024 年版，讓你勾選評估項目並即時看到總分、標章等級與缺口。</p><ul><li><b>勾選得分</b>：點項目右側的「+分數」。階梯給分每組只能選一個等級，再點一次取消。</li><li><b>基本規定</b>：每個指標有一個「基本規定已符合」勾選；未全數符合時沒有任何等級。</li><li><b>加分</b>：2024 版的「智慧創新」指標為加分（36 分）。2016 版沒有獨立加分。</li><li><b>不適用／認定項目</b>：不適用項目不計入分母；需評定小組認定的項目，請自行選擇分數。</li><li><b>取分建議</b>：只產生清單，不會自動勾選。手冊沒有提供施作難易度，排序只依可增加的分數。</li><li><b>等級</b>：上方等級列只顯示目前達到哪一級，會隨基本規定與分數自動變化，不需點選。</li></ul><div class="warnb">資料存在這個瀏覽器的 localStorage，<b>不是雲端備份</b>，換裝置或清除瀏覽資料就會消失。' + (ADMIN ? '請用「匯出」定期備份。' : '重要結果請自行截圖留存。') + '</div><p>本工具僅供評估規劃與試算，不等同主管機關或評定機構的正式審查結果。</p>');
+  }
+
+  // ---------------------------------------------------------------- 動作
+  async function confirmIfUnsaved() {
+    if (saveSt.ok) return true;
+    return ask({ title: '資料尚未儲存', body: '<p>目前的資料<b>儲存失敗</b>（' + esc(saveSt.error) + '）。切換後仍留在這個頁面可繼續使用，但重新整理會遺失。' + (ADMIN ? '建議先「匯出」備份。' : '') + '仍要切換嗎？</p>', ok: '仍要切換' });
+  }
+  function applyAnswers(answers, basics, msg) {
+    commit({ answers, basics }, true);
+    toast(msg, { act: 'undo', label: '復原' });
+  }
+  function download(name, text) {
+    try {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' })); a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+    } catch (e) { toast('此環境無法下載，請改用「複製」'); }
+  }
+
+  const actions = {
+    async ver(b) {
+      if (b.dataset.v === proj().version) return;
+      if (!(await confirmIfUnsaved())) return;
+      ui.open.clear(); ui.sg.clear(); ui.advice = null;
+      setProject({ version: b.dataset.v, cat: 0 });
+      toast('已切換到 ' + rules().label + '；各版本與類別的勾選分開保存，切回來會還原');
+    },
+    async cat(b) {
+      if (+b.dataset.v === proj().cat) return;
+      if (!(await confirmIfUnsaved())) return;
+      ui.sg.clear(); setProject({ cat: +b.dataset.v });
+    },
+    theme() {
+      const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+      db.theme = dark ? 'light' : 'dark'; document.documentElement.dataset.theme = db.theme; scheduleSave(); render();
+    },
+    ind(b) { const id = b.dataset.id; ui.open.has(id) ? ui.open.delete(id) : ui.open.add(id); render(); },
+    openAll() { rules().indicators.forEach((i) => ui.open.add(i.id)); render(); },
+    closeAll() { ui.open.clear(); render(); },
+    detail(b) { const id = b.dataset.id; ui.detail.has(id) ? ui.detail.delete(id) : ui.detail.add(id); render(); },
+    ctl(b) {
+      const R = rules(), st = stateNow(), id = b.dataset.id, j = +b.dataset.j, f = E.findItem(R, id), ctrl = f.it.controls[j];
+      const cur = (st.answers[id] || E.blankAnswer(f.it))[j];
+      let v;
+      if (ctrl.type === 'check') v = cur ? 0 : 1;
+      else if (ctrl.type === 'tier') v = cur === +b.dataset.v ? -1 : +b.dataset.v;
+      else v = Math.max(0, Math.min(ctrl.max, (cur || 0) + +b.dataset.d));
+      commit({ answers: E.setControl(R, st.answers, id, j, v), basics: st.basics });
+    },
+    sys(b) {
+      const R = rules(), st = stateNow(), id = b.dataset.id, j = +b.dataset.j, k = +b.dataset.b, f = E.findItem(R, id);
+      const cur = (st.answers[id] || E.blankAnswer(f.it))[j] || 0, bit = Math.pow(2, k), on = Math.floor(cur / bit) % 2 === 1;
+      commit({ answers: E.setControl(R, st.answers, id, j, on ? cur - bit : cur + bit), basics: st.basics });
+    },
+    rst(b) { const st = stateNow(); commit({ answers: E.resetItem(st.answers, b.dataset.id), basics: st.basics }); },
+    basic(b) { const st = stateNow(); const nb = Object.assign({}, st.basics); if (b.checked) nb[b.dataset.id] = true; else delete nb[b.dataset.id]; commit({ answers: st.answers, basics: nb }); },
+    basicAll(b) {
+      const R = rules(), st = stateNow(), ind = R.indicators.find((i) => i.id === b.dataset.id); if (!ind) return;
+      const nb = Object.assign({}, st.basics); E.basicRules(ind, E.catIndex(R, st.cat)).forEach((r) => { if (b.checked) nb[r.id] = true; else delete nb[r.id]; });
+      commit({ answers: st.answers, basics: nb });
+    },
+    async fill0() {
+      const R = rules();
+      
+      const st = stateNow();
+      applyAnswers(E.fillAnswers(R, st.cat, { includeBonus: false }), E.basicsAll(R, st.cat), '已填入「不含加分」情境');
+    },
+    async fill1() {
+      const R = rules();
+      
+      const st = stateNow();
+      applyAnswers(E.fillAnswers(R, st.cat, { includeBonus: true }), E.basicsAll(R, st.cat), '已填入「全加分」情境');
+    },
+    async clear() {
+      
+      applyAnswers({}, {}, '已清除目前版本與類別的勾選');
+    },
+    undo() {
+      if (!undo || undo.id !== proj().id) return toast('沒有可復原的操作');
+      const u = undo; undo = null;
+      const p = proj();
+      const R = RULES[u.version];
+      db.projects[p.id] = S.withSlice(R, p, u.cat, u.slice);
+      if (p.version !== u.version || p.cat !== u.cat) db.projects[p.id] = Object.assign({}, db.projects[p.id], { version: u.version, cat: u.cat });
+      ui.sg.clear(); scheduleSave(); render(); toast('已復原');
+    },
+    fold() { ui.fold = !ui.fold; render(); },
+    advice() { actions.advPreset(); },
+    advClose() { ui.advice = null; render(); },
+    advPreset() {
+      const R = rules(), P = presetOf(R), st = stateNow(); if (!P) return;
+      applyAnswers(Object.assign({}, P.answers), E.basicsAll(R, st.cat), '已套用 ' + F(P.total) + ' 分建議組合（試算情境）');
+      Object.keys(P.answers).forEach((i) => ui.sg.add(i)); R.indicators.forEach((i) => ui.open.add(i.id)); render();
+    },
+    advApply(b) { const st = stateNow(); applyAnswers(A.applyItem(rules(), st.answers, b.dataset.id), st.basics, '已套用 ' + b.dataset.id + '（試算情境）'); ui.sg.add(b.dataset.id); render(); },
+    advApplyAll() {
+      const st = stateNow(), sg = A.suggest(rules(), st, { target: ui.advice && ui.advice.target });
+      const ids = sg.plan.map((x) => x.id);
+      applyAnswers(A.applyMany(rules(), st.answers, ids), st.basics, '已套用 ' + ids.length + ' 項建議（試算情境）');
+      ids.forEach((i) => ui.sg.add(i)); rules().indicators.forEach((ind) => ui.open.add(ind.id)); render();
+    },
+    cases() { casesDlg(); },
+    projects() { projectsDlg(); },
+    async pNew() {
+      const inp = $('#newName'); const name = inp ? inp.value : '';
+      const p = S.newProject(name || '新專案', proj().version);
+      db.projects[p.id] = p; db.active = p.id; ui.open.clear(); ui.sg.clear(); undo = null; scheduleSave(); render(); closeDlg('dlg'); toast('已建立專案「' + p.name + '」');
+    },
+    async pSwitch(b) { if (!(await confirmIfUnsaved())) return; db.active = b.dataset.id; ui.open.clear(); ui.sg.clear(); undo = null; scheduleSave(); render(); closeDlg('dlg'); toast('已切換到「' + proj().name + '」'); },
+    async pRename(b) { const p = db.projects[b.dataset.id]; const n = await ask({ title: '重新命名專案', input: { label: '專案名稱', value: p.name } }); if (!n) return; db.projects[p.id] = Object.assign({}, p, { name: n, updated: Date.now() }); scheduleSave(); render(); projectsDlg(); },
+    async pDelete(b) {
+      const ids = Object.keys(db.projects);
+      if (ids.length <= 1) return toast('至少需保留一個專案');
+      const p = db.projects[b.dataset.id];
+      if (!(await ask({ title: '刪除專案', body: '<p>確定刪除「' + esc(p.name) + '」？其所有版本與類別的勾選都會一併刪除，無法復原。</p>', ok: '刪除', danger: true }))) return;
+      delete db.projects[p.id];
+      if (db.active === p.id) db.active = Object.keys(db.projects)[0];
+      undo = null; scheduleSave(); render(); projectsDlg();
+    },
+    export() { closeDlg('dlg'); exportDlg(); },
+    copyExp() { const t = $('#expTxt'); t.select(); try { navigator.clipboard.writeText(t.value).then(() => toast('已複製'), () => { document.execCommand('copy'); toast('已複製'); }); } catch (e) { try { document.execCommand('copy'); toast('已複製'); } catch (e2) { toast('請手動複製文字框內容'); } } },
+    dlExp() { download((proj().name || 'project').replace(/[\\/:*?"<>|]/g, '_') + '.sbs.json', $('#expTxt').value); },
+    import() { closeDlg('dlg'); importDlg(); },
+    async doImport() {
+      const txt = $('#impTxt').value.trim(), msg = $('#impMsg');
+      if (!txt) { msg.innerHTML = '<div class="errb">請先選擇檔案或貼上內容。</div>'; return; }
+      const r = S.parseImport(txt, RULES);
+      if (!r.ok) { msg.innerHTML = '<div class="errb"><b>無法匯入，現有資料未被改動：</b><ul>' + r.errors.map((e) => '<li>' + esc(e) + '</li>').join('') + '</ul></div>'; return; }
+      if (r.warnings.length && !(await ask({ title: '部分內容將被忽略', body: '<div class="warnb">' + r.warnings.slice(0, 8).map(esc).join('<br>') + (r.warnings.length > 8 ? '<br>…共 ' + r.warnings.length + ' 項' : '') + '</div><p>其餘資料可以匯入，仍要繼續嗎？</p>', ok: '繼續匯入' }))) return;
+      let name = r.project.name; const names = Object.values(db.projects).map((p) => p.name); if (names.includes(name)) name += '（匯入）';
+      r.project.name = name; db.projects[r.project.id] = r.project; db.active = r.project.id; ui.open.clear(); undo = null; scheduleSave(); render(); closeDlg('dlg'); toast('已匯入專案「' + name + '」');
+    },
+    print() { buildReport(); try { window.print(); } catch (e) { toast('此環境無法列印，請改用瀏覽器的列印功能'); } },
+    help() { helpDlg(); },
+  };
+
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-act]');
+    if (!b || b.disabled) return;
+    if (b.tagName === 'SELECT' || (b.tagName === 'INPUT' && b.type === 'checkbox')) return; // 由 change 事件處理
+    const fn = actions[b.dataset.act];
+    if (fn) fn(b);
+  });
+  document.addEventListener('change', (e) => {
+    const t = e.target;
+    if (t.dataset && t.dataset.act === 'ev') {
+      const sl = sliceNow(), evd = Object.assign({}, sl.evidence), cur = Object.assign({ page: '', doc: '' }, evd[t.dataset.id]);
+      cur[t.dataset.f] = t.value.trim(); if (cur.page || cur.doc) evd[t.dataset.id] = cur; else delete evd[t.dataset.id];
+      db.projects[db.active] = S.withSlice(rules(), proj(), proj().cat, Object.assign({}, sl, { evidence: evd })); scheduleSave(); return;
+    }
+    if (t.dataset && t.dataset.act === 'basic') actions.basic(t);
+    if (t.dataset && t.dataset.act === 'basicAll') actions.basicAll(t);
+    if (t.dataset && t.dataset.act === 'advTarget') { ui.advice = { target: t.value === '' ? null : +t.value }; render(); }
+  });
+
+  // ---------------------------------------------------------------- 啟動
+  if (db.theme) document.documentElement.dataset.theme = db.theme;
+  // 版本說明：滑鼠移上、鍵盤聚焦或點一下顯示（手機用點的），點別處關閉
+  (() => {
+    const w = document.querySelector('.vwrap'), btn = $('#verBtn');
+    btn.addEventListener('click', (e) => { e.stopPropagation(); const o = w.classList.toggle('open'); btn.setAttribute('aria-expanded', String(o)); });
+    document.addEventListener('click', () => { w.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { w.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); btn.blur(); } });
+  })();
+  renderNote(); render();
+  if (loaded.error) toast(loaded.error);
+  if (!persistent) toast('此瀏覽器無法使用 localStorage，資料不會保留');
+  window.SBS_APP = { get db() { return db; }, render, ui }; // 供測試使用
+})();
+
+</script>
+</body>
+</html>
