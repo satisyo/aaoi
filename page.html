@@ -1,0 +1,384 @@
+<meta name="dash-one-writer">
+<style>
+.ax { font-family: var(--font-anthropic-sans); color: var(--color-fg); }
+.ax h1 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0 0 var(--cds-gap-xs); }
+.ax .lede { color: var(--color-fg-muted); font-size: var(--cds-font-size-body); margin: 0 0 var(--cds-gap-lg); line-height: 1.6; }
+.ax .lede b, .ax .tile b, .ax p b { font-weight: 600; font-variant-numeric: tabular-nums; color: var(--color-fg); }
+.ax h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: var(--cds-gap-xl) 0 var(--cds-gap-sm); }
+.ax .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: var(--cds-gap-md); }
+.ax .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); gap: var(--cds-gap-md); }
+.ax .card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); position: relative; min-width: 0; }
+.ax .card h3 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; }
+.ax .note { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); margin: var(--cds-gap-xs) 0 var(--cds-gap-md); line-height: 1.5; }
+.ax .tile .k { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.ax .tile .v { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; margin-top: var(--cds-gap-xs); }
+.ax .tile .s { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-top: var(--cds-gap-xs); font-variant-numeric: tabular-nums; }
+.ax .bad { color: var(--color-bad); } .ax .ok { color: var(--color-ok); }
+.ax .chart { width: 100%; min-height: 120px; position: relative; }
+.ax .ladder { min-height: 440px; }
+@media (max-width: 560px) { .ax .ladder { min-height: 600px; } .ax .tile .v { font-size: var(--cds-font-size-heading); } }
+.ax .scen { min-height: 214px; }
+.ax .rev { min-height: 240px; }
+.ax .ls { min-height: 64px; }
+.ax table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+.ax th { text-align: left; color: var(--color-fg-muted); font-weight: var(--cds-font-weight-medium); padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); }
+.ax td { padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); vertical-align: top; line-height: 1.5; }
+.ax td.num, .ax th.num { text-align: right; white-space: nowrap; }
+.ax td.nw { white-space: nowrap; }
+.ax .tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); max-width: 16rem; z-index: 2; line-height: 1.45; }
+.ax .tip .t { color: var(--cds-text-secondary); }
+.ax .disc { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); line-height: 1.6; margin-top: var(--cds-gap-xl); border-top: 1px solid var(--color-border-line); padding-top: var(--cds-pad-md); }
+.ax [data-dash-source-state=empty] { color: transparent; }
+.ax [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+@media (max-width: 560px) { .ax .hide-n { display: none; } }
+</style>
+
+<div class="ax">
+  <h1 id="top">AAOI 籌碼與點位儀表板</h1>
+  <p class="lede">10/30 收盤 <b data-draw="v-close" data-source="snapshot" data-field="value" data-where="metric=close">—</b>，財報（11/5 美東盤後）週選擇權隱含波動約 ±<b data-draw="v-im" data-source="snapshot" data-field="value" data-where="metric=implied_move">—</b>，對應區間 <b data-draw="v-bandlo" data-source="stats" data-field="value" data-where="key=band_low">—</b>–<b data-draw="v-bandhi" data-source="stats" data-field="value" data-where="key=band_high">—</b>；三情境機率加權預期價 <b data-draw="v-ev" data-source="ev" data-field="value" data-where="key=ev">—</b>。關鍵多空分界：上看跳空缺口 <b data-draw="v-gap" data-source="levels" data-field="price" data-where="reason=10%2F29%20收盤，10%2F30%20跳空缺口上緣">—</b> 能否收復，下守前低 <b data-draw="v-low" data-source="snapshot" data-field="value" data-where="metric=day_low">—</b>。</p>
+
+  <div class="tiles">
+    <div class="card tile"><div class="k">收盤價 · 10/30</div><div class="v" data-draw="t-close" data-source="snapshot" data-field="value" data-where="metric=close">—</div><div class="s">單日 <span data-draw="t-chg" data-source="snapshot" data-field="value" data-where="metric=chg">—</span></div></div>
+    <div class="card tile"><div class="k">距 52 週高點</div><div class="v" data-draw="t-dd" data-source="stats" data-field="value" data-where="key=drawdown">—</div><div class="s">高點 <span data-draw="t-high" data-source="snapshot" data-field="value" data-where="metric=high52">—</span>（5/13）</div></div>
+    <div class="card tile"><div class="k">空單占流通股</div><div class="v" data-draw="t-si" data-source="stats" data-field="value" data-where="key=short_pct">—</div><div class="s">回補 <span data-draw="t-dtc" data-source="snapshot" data-field="value" data-where="metric=dtc">—</span> 天 · 9/30 申報</div></div>
+    <div class="card tile"><div class="k">財報週隱含波動</div><div class="v" data-draw="t-im" data-source="snapshot" data-field="value" data-where="metric=implied_move">—</div><div class="s">11/6 到期週選擇權</div></div>
+    <div class="card tile"><div class="k">市值</div><div class="v" data-draw="t-mcap" data-source="snapshot" data-field="value" data-where="metric=mcap">—</div><div class="s">Beta <span data-draw="t-beta" data-source="snapshot" data-field="value" data-where="metric=beta">—</span></div></div>
+  </div>
+
+  <h2 id="ls">多空力道（類 CoinGlass 多空比）</h2>
+  <div class="card">
+    <h3>九項因子的多空分數加總</h3>
+    <p class="note">每項因子 −2 到 +2 分，由新聞、財報與籌碼資料主觀評分；多方占比 = 正分總和 ÷ 正負分絕對值總和。</p>
+    <div class="chart ls" data-draw="ls" data-source="lsratio"></div>
+  </div>
+
+  <h2 id="levels">點位地圖</h2>
+  <div class="grid">
+    <div class="card" style="grid-column: 1 / -1;">
+      <h3>壓力與支撐（類清算熱力圖，按價格排列）</h3>
+      <p class="note">紅色為上方壓力、綠色為下方支撐，長條越長代表該價位越關鍵（1–5 分）。灰底為財報週選擇權隱含波動區間。沒有逐檔期權未平倉資料，點位改由增發均價、跳空缺口、近期高低點與分析師目標價推得。</p>
+      <div class="chart ladder" data-draw="ladder" data-source="levels snapshot"></div>
+    </div>
+  </div>
+
+  <h2 id="forecast">財報後點位預測</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>三情境價格區間</h3>
+      <p class="note">機率為綜合判斷，非模型輸出。直線為現價，虛線為機率加權預期價。</p>
+      <div class="chart scen" data-draw="scen" data-source="scenarios ev snapshot"></div>
+    </div>
+    <div class="card">
+      <h3>情境觸發條件</h3>
+      <p class="note">11/5 財報要看三件事：Q3 營收是否落在公司指引內、Q4 指引高低（800G/1.6T 放量）、有無新一輪增發。</p>
+      <table data-source="scenarios" data-row-key="scenario">
+        <thead><tr><th data-field="scenario">情境</th><th data-field="prob" class="num">機率</th><th data-field="low" class="num">低</th><th data-field="high" class="num">高</th><th data-field="trigger" class="hide-n">觸發條件</th></tr></thead>
+        <tbody data-draw="scen-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <h2 id="fund">基本面與華爾街</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>季營收（百萬美元）</h3>
+      <p class="note">實心為實際營收，短橫線為當季市場預估；Q3'26 僅有預估。</p>
+      <div class="chart rev" data-draw="rev" data-source="quarterly"></div>
+    </div>
+    <div class="card">
+      <h3>分析師目標價</h3>
+      <p class="note">最低目標價仍高於現價，但 10 月起已有兩家下修。</p>
+      <table data-source="analysts" data-row-key="firm">
+        <thead><tr><th data-field="firm">券商</th><th data-field="rating">評級</th><th data-field="target" class="num">目標價</th><th data-field="date" class="num">日期</th></tr></thead>
+        <tbody data-draw="an-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <h2 id="factors">多空因子明細</h2>
+  <div class="card">
+    <table data-source="factors" data-row-key="factor">
+      <thead><tr><th data-field="factor">因子</th><th data-field="score" class="num">分數</th><th data-field="note">依據</th></tr></thead>
+      <tbody data-draw="fac-body"></tbody>
+    </table>
+  </div>
+
+  <h2 id="news">新聞時間軸</h2>
+  <div class="card">
+    <table data-source="news" data-row-key="date">
+      <thead><tr><th data-field="date">日期</th><th data-field="tone">多空</th><th data-field="headline">事件</th></tr></thead>
+      <tbody data-draw="news-body"></tbody>
+    </table>
+  </div>
+
+  <p class="disc">資料為 2026/11/2 整理的網路公開資訊快照（MarketBeat、TipRanks、24/7 Wall St.、OptionSlam、公司 8-K 等），不會自動更新。情境機率與因子分數為主觀判斷，點位為技術參考，不構成投資建議；AAOI 波動極大，財報前後單日大幅跳動屬常態，請自行控管部位與風險。</p>
+</div>
+
+<script>
+(() => {
+  const ok = (id) => dash.data(id).status === 'ok';
+  const rows = (id) => (ok(id) ? dash.data(id).data : []);
+  const usd = d3.format('$,.2f');
+  const pct1 = d3.format('.1%');
+  const spct = d3.format('+.1%');
+  const compact = (v) => '$' + Intl.NumberFormat('en', {notation: 'compact', maximumFractionDigits: 2}).format(v);
+  window.axFmt = {usd, pct1, spct, compact};
+
+  dash.calc('stats', {
+    inputs: ['snapshot'],
+    title: '派生指標',
+    description: '由快照計算：距 52 週高點跌幅、空單占流通股比例、隱含波動上下緣價格。',
+    fn: (snapshot) => {
+      const g = (m) => +(snapshot.find((r) => r.metric === m) || {}).value;
+      const c = g('close'), im = g('implied_move');
+      return [
+        {key: 'drawdown', value: c / g('high52') - 1},
+        {key: 'short_pct', value: g('short_shares') / g('shares')},
+        {key: 'band_low', value: c * (1 - im)},
+        {key: 'band_high', value: c * (1 + im)},
+      ];
+    },
+  });
+  dash.calc('ev', {
+    inputs: ['scenarios'],
+    title: '機率加權預期價',
+    description: '各情境區間中點乘上機率後加總。',
+    fn: (scenarios) => [{key: 'ev', value: d3.sum(scenarios, (r) => +r.prob * (+r.low + +r.high) / 2)}],
+  });
+  dash.calc('lsratio', {
+    inputs: ['factors'],
+    title: '多空比',
+    description: '正分總和與負分絕對值總和，及多方占比。',
+    fn: (factors) => {
+      const bull = d3.sum(factors, (r) => Math.max(0, +r.score));
+      const bear = d3.sum(factors, (r) => Math.max(0, -r.score));
+      return [{key: 'bull', value: bull}, {key: 'bear', value: bear}, {key: 'bull_share', value: bull / (bull + bear)}];
+    },
+  });
+
+  const val = (id, k, keyCol = 'metric') => {
+    const r = rows(id).find((x) => x[keyCol] === k);
+    return r ? +r.value : null;
+  };
+  const vDraw = (name, id, k, fmt, keyCol, cls) => dash.draw(name, (el) => {
+    const v = val(id, k, keyCol);
+    el.textContent = v == null ? '—' : fmt(v);
+    if (cls) el.className = v == null ? '' : cls(v);
+  });
+  const sign = (v) => (v < 0 ? 'bad' : 'ok');
+  vDraw('v-close', 'snapshot', 'close', usd);
+  vDraw('t-close', 'snapshot', 'close', usd);
+  vDraw('v-im', 'snapshot', 'implied_move', pct1);
+  vDraw('t-im', 'snapshot', 'implied_move', (v) => '±' + pct1(v));
+  vDraw('t-chg', 'snapshot', 'chg', spct, 'metric', sign);
+  vDraw('t-high', 'snapshot', 'high52', usd);
+  vDraw('t-dtc', 'snapshot', 'dtc', d3.format('.1f'));
+  vDraw('t-mcap', 'snapshot', 'mcap', compact);
+  vDraw('t-beta', 'snapshot', 'beta', d3.format('.2f'));
+  vDraw('v-bandlo', 'stats', 'band_low', usd, 'key');
+  vDraw('v-bandhi', 'stats', 'band_high', usd, 'key');
+  vDraw('t-dd', 'stats', 'drawdown', spct, 'key', sign);
+  vDraw('t-si', 'stats', 'short_pct', pct1, 'key');
+  vDraw('v-ev', 'ev', 'ev', usd, 'key');
+  vDraw('v-low', 'snapshot', 'day_low', usd);
+  dash.draw('v-gap', (el) => { const r = rows('levels').find((x) => String(x.reason).includes('跳空缺口')); el.textContent = r ? usd(+r.price) : '—'; });
+})();
+</script>
+
+<script>
+(() => {
+  const {usd, pct1, spct} = window.axFmt;
+  const ok = (id) => dash.data(id).status === 'ok';
+  const rows = (id) => (ok(id) ? dash.data(id).data : []);
+  const failLine = (el) => {
+    el.replaceChildren();
+    const d = document.createElement('div');
+    d.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:.4rem;height:100%;min-height:inherit;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)';
+    const dot = document.createElement('span');
+    dot.style.cssText = 'width:.375rem;height:.375rem;border-radius:50%;background:var(--color-bad)';
+    d.append(dot, document.createTextNode('Failed to load'));
+    el.append(d);
+  };
+  const guard = (el, ids) => {
+    const st = ids.map((i) => dash.data(i).status);
+    if (st.some((s) => s === 'error')) { el.classList.remove('dash-skeleton'); failLine(el); return false; }
+    if (st.some((s) => s !== 'ok')) { el.replaceChildren(); el.classList.add('dash-skeleton'); return false; }
+    el.classList.remove('dash-skeleton');
+    el.replaceChildren();
+    return true;
+  };
+  const tipper = (el) => {
+    const t = document.createElement('div');
+    t.className = 'tip'; t.hidden = true; el.append(t);
+    return {
+      show(ev, title, lines) {
+        t.replaceChildren();
+        const h = document.createElement('div'); h.className = 't'; h.textContent = title; t.append(h);
+        lines.forEach((l) => { const p = document.createElement('div'); p.textContent = l; t.append(p); });
+        t.hidden = false;
+        const b = el.getBoundingClientRect();
+        let x = ev.clientX - b.left + 12, y = ev.clientY - b.top + 12;
+        const w = t.offsetWidth, hh = t.offsetHeight;
+        if (x + w > b.width) x = Math.max(0, ev.clientX - b.left - w - 12);
+        if (y + hh > b.height) y = Math.max(0, b.height - hh);
+        t.style.left = x + 'px'; t.style.top = y + 'px';
+      },
+      hide() { t.hidden = true; },
+    };
+  };
+  const svgFor = (el, w, h) => d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${w} ${h}`).style('display', 'block').style('overflow', 'visible');
+  const txtW = (svg, s, size = 12) => {
+    const t = svg.append('text').attr('font-size', size).attr('font-family', 'var(--font-anthropic-sans)').text(s);
+    const w = t.node().getComputedTextLength(); t.remove(); return w;
+  };
+
+  // Long/short gauge
+  dash.draw('ls', (el) => {
+    if (!guard(el, ['lsratio'])) return;
+    const r = rows('lsratio'); const g = (k) => +(r.find((x) => x.key === k) || {}).value;
+    const bull = g('bull'), bear = g('bear'), share = g('bull_share');
+    const w = Math.max(280, el.clientWidth), h = 64;
+    const svg = svgFor(el, w, h);
+    const x = d3.scaleLinear([0, 1], [0, w]);
+    svg.append('rect').attr('x', 0).attr('y', 22).attr('width', x(share)).attr('height', 18).attr('rx', 4).style('fill', 'var(--color-ok)').style('opacity', .8);
+    svg.append('rect').attr('x', x(share)).attr('y', 22).attr('width', w - x(share)).attr('height', 18).attr('rx', 4).style('fill', 'var(--color-bad)').style('opacity', .8);
+    svg.append('line').attr('x1', x(.5)).attr('x2', x(.5)).attr('y1', 16).attr('y2', 46).style('stroke', 'var(--cds-chart-reference)').attr('stroke-dasharray', '3 3');
+    svg.append('text').attr('x', 0).attr('y', 14).attr('font-size', 12).style('fill', 'var(--color-ok)').text(`多方 ${pct1(share)}（+${bull} 分）`);
+    svg.append('text').attr('x', w).attr('y', 14).attr('text-anchor', 'end').attr('font-size', 12).style('fill', 'var(--color-bad)').text(`空方 ${pct1(1 - share)}（−${bear} 分）`);
+    svg.append('text').attr('x', x(.5)).attr('y', 60).attr('text-anchor', 'middle').attr('font-size', 11).style('fill', 'var(--color-fg-muted)').text('50% 中線');
+  });
+
+  // Level ladder
+  dash.draw('ladder', (el) => {
+    if (!guard(el, ['levels', 'snapshot'])) return;
+    const snap = rows('snapshot'); const g = (m) => +(snap.find((r) => r.metric === m) || {}).value;
+    const close = g('close'), im = g('implied_move');
+    const lv = rows('levels').map((r) => ({...r, price: +r.price, strength: +r.strength}));
+    const items = [...lv, {price: close, side: '現價', strength: 0, reason: '10/30 收盤', cur: true}].sort((a, b) => b.price - a.price);
+    const w = Math.max(300, el.clientWidth), narrow = w < 560, rowH = narrow ? 46 : 34, top = 6, h = top + items.length * rowH + 6;
+    const svg = svgFor(el, w, h);
+    const tip = tipper(el);
+    const priceW = d3.max(items, (d) => txtW(svg, usd(d.price), 13)) + 10;
+    const distW = d3.max(items, (d) => txtW(svg, spct(d.price / close - 1), 12)) + 12;
+    const barX = priceW + distW + 8;
+    const barMax = narrow ? Math.max(40, w - barX - 4) : Math.min(240, (w - barX) * 0.35);
+    const xb = d3.scaleLinear([0, 5], [0, barMax]);
+    const y = (i) => top + i * rowH;
+    // implied band
+    const inBand = items.map((d, i) => [d, i]).filter(([d]) => d.price <= close * (1 + im) + 1e-6 && d.price >= close * (1 - im) - 1e-6);
+    if (inBand.length) {
+      const i0 = d3.min(inBand, (d) => d[1]), i1 = d3.max(inBand, (d) => d[1]);
+      svg.append('rect').attr('x', 0).attr('y', y(i0) - 2).attr('width', w).attr('height', (i1 - i0 + 1) * rowH + 4).attr('rx', 4).style('fill', 'var(--color-fg)').style('opacity', .05);
+      svg.append('text').attr('x', w - 4).attr('y', y(i1) + rowH - 6).attr('text-anchor', 'end').attr('font-size', 10).style('fill', 'var(--color-fg-muted)').text('隱含波動區間');
+    }
+    items.forEach((d, i) => {
+      const gy = y(i), mid = narrow && !d.cur ? gy + 15 : gy + rowH / 2;
+      const gr = svg.append('g');
+      if (d.cur) {
+        gr.append('line').attr('x1', 0).attr('x2', w).attr('y1', mid).attr('y2', mid).style('stroke', 'var(--color-fg)').attr('stroke-dasharray', '4 3').attr('stroke-width', 1.5);
+        gr.append('rect').attr('x', 0).attr('y', mid - 11).attr('width', priceW + distW).attr('height', 22).attr('rx', 4).style('fill', 'var(--color-fg)');
+        gr.append('text').attr('x', 6).attr('y', mid + 4.5).attr('font-size', 13).attr('font-weight', 600).style('fill', 'var(--color-bg)').text(usd(d.price) + '  現價');
+        return;
+      }
+      const col = d.side === '壓力' ? 'var(--color-bad)' : 'var(--color-ok)';
+      gr.append('text').attr('x', 0).attr('y', mid + 4.5).attr('font-size', 13).style('fill', 'var(--color-fg)').style('font-variant-numeric', 'tabular-nums').text(usd(d.price));
+      gr.append('text').attr('x', priceW).attr('y', mid + 4).attr('font-size', 12).style('fill', col).text(spct(d.price / close - 1));
+      gr.append('rect').attr('x', barX).attr('y', mid - (narrow ? 9 : 7)).attr('width', xb(d.strength)).attr('height', 14).attr('rx', 3).style('fill', col).style('opacity', .3 + d.strength * .12);
+      {
+        const rx = narrow ? 0 : barX + barMax + 12;
+        const tx = gr.append('text').attr('x', rx).attr('y', narrow ? gy + rowH - 8 : mid + 4).attr('font-size', narrow ? 11 : 12).style('fill', 'var(--color-fg-muted)').text(d.reason);
+        const room = w - rx;
+        let s = d.reason;
+        while (tx.node().getComputedTextLength() > room && s.length > 4) { s = s.slice(0, -2); tx.text(s + '…'); }
+      }
+      gr.append('rect').attr('x', 0).attr('y', gy).attr('width', w).attr('height', rowH).style('fill', 'transparent')
+        .on('mousemove', (ev) => tip.show(ev, `${d.side} · ${usd(d.price)}`, [`距現價 ${spct(d.price / close - 1)}`, `強度 ${d.strength} / 5`, d.reason]))
+        .on('mouseleave', () => tip.hide());
+    });
+  });
+
+  // Scenario ranges
+  dash.draw('scen', (el) => {
+    if (!guard(el, ['scenarios', 'ev', 'snapshot'])) return;
+    const sc = rows('scenarios').map((r) => ({...r, low: +r.low, high: +r.high, prob: +r.prob}));
+    const ev = +rows('ev')[0].value;
+    const close = +(rows('snapshot').find((r) => r.metric === 'close') || {}).value;
+    const w = Math.max(280, el.clientWidth), h = 214;
+    const svg = svgFor(el, w, h);
+    const tip = tipper(el);
+    const lab = d3.max(sc, (d) => txtW(svg, `${d.scenario} ${pct1(d.prob)}`, 12)) + 10;
+    const lo = Math.floor(d3.min(sc, (d) => d.low) / 5) * 5 - 5, hi = Math.ceil(d3.max(sc, (d) => d.high) / 5) * 5 + 5;
+    const x = d3.scaleLinear([lo, hi], [lab, w - 8]);
+    const yb = d3.scaleBand(sc.map((d) => d.scenario), [18, h - 48]).padding(.35);
+    const ax = svg.append('g').attr('transform', `translate(0,${h - 40})`).call(d3.axisBottom(x).ticks(Math.max(3, Math.floor((w - lab) / 70))).tickFormat((v) => '$' + v));
+    ax.attr('font-size', null).attr('font-family', null);
+    ax.selectAll('text').style('fill', 'var(--color-fg-muted)').attr('font-size', 11);
+    ax.selectAll('line,path').style('stroke', 'var(--cds-chart-axis)');
+    const colr = {'多頭': 'var(--color-ok)', '中性': 'var(--cds-chart-muted)', '空頭': 'var(--color-bad)'};
+    sc.forEach((d) => {
+      svg.append('text').attr('x', 0).attr('y', yb(d.scenario) + yb.bandwidth() / 2 + 4).attr('font-size', 12).style('fill', 'var(--color-fg)').text(`${d.scenario} ${pct1(d.prob)}`);
+      svg.append('rect').attr('x', x(d.low)).attr('y', yb(d.scenario)).attr('width', x(d.high) - x(d.low)).attr('height', yb.bandwidth()).attr('rx', 4)
+        .style('fill', colr[d.scenario] || dash.colors[0]).style('opacity', .75)
+        .on('mousemove', (e) => tip.show(e, `${d.scenario}情境 · 機率 ${pct1(d.prob)}`, [`${usd(d.low)} – ${usd(d.high)}`, d.trigger]))
+        .on('mouseleave', () => tip.hide());
+    });
+    const vline = (v, dash_, label, anchorTop) => {
+      svg.append('line').attr('x1', x(v)).attr('x2', x(v)).attr('y1', 12).attr('y2', h - 40).style('stroke', 'var(--color-fg)').attr('stroke-width', 1.5).attr('stroke-dasharray', dash_);
+      svg.append('text').attr('x', x(v)).attr('y', anchorTop ? 8 : h - 2).attr('text-anchor', 'middle').attr('font-size', 11).style('fill', 'var(--color-fg)').text(label);
+    };
+    vline(close, null, '現價 ' + usd(close), true);
+    vline(ev, '4 3', '預期 ' + usd(ev), false);
+  });
+
+  // Revenue bars
+  dash.draw('rev', (el) => {
+    if (!guard(el, ['quarterly'])) return;
+    const q = rows('quarterly').map((r) => ({...r, revenue: r.revenue == null ? null : +r.revenue, estimate: +r.estimate}));
+    const w = Math.max(280, el.clientWidth), h = 240, m = {t: 18, r: 8, b: 26, l: 8};
+    const svg = svgFor(el, w, h);
+    const tip = tipper(el);
+    const ymax = d3.max(q, (d) => Math.max(d.revenue || 0, d.estimate));
+    const yy = d3.scaleLinear([0, ymax * 1.12], [h - m.b, m.t]);
+    const ticks = yy.ticks(4);
+    m.l = d3.max(ticks, (t) => txtW(svg, '$' + t, 11)) + 8;
+    const x = d3.scaleBand(q.map((d) => d.quarter), [m.l, w - m.r]).padding(.3);
+    ticks.forEach((t) => {
+      svg.append('line').attr('x1', m.l).attr('x2', w - m.r).attr('y1', yy(t)).attr('y2', yy(t)).style('stroke', 'var(--cds-chart-grid)');
+      svg.append('text').attr('x', m.l - 6).attr('y', yy(t) + 4).attr('text-anchor', 'end').attr('font-size', 11).style('fill', 'var(--color-fg-muted)').text('$' + t);
+    });
+    const bw = Math.min(32, x.bandwidth());
+    q.forEach((d) => {
+      const cx = x(d.quarter) + x.bandwidth() / 2;
+      const v = d.revenue ?? d.estimate;
+      svg.append('rect').attr('x', cx - bw / 2).attr('y', yy(v)).attr('width', bw).attr('height', yy(0) - yy(v)).attr('rx', 3)
+        .style('fill', d.revenue == null ? 'var(--cds-chart-muted)' : dash.colors[0]).style('opacity', d.revenue == null ? .6 : 1);
+      svg.append('line').attr('x1', cx - bw / 2 - 4).attr('x2', cx + bw / 2 + 4).attr('y1', yy(d.estimate)).attr('y2', yy(d.estimate)).style('stroke', 'var(--color-fg)').attr('stroke-width', 2);
+      svg.append('text').attr('x', cx).attr('y', yy(Math.max(v, d.estimate)) - 6).attr('text-anchor', 'middle').attr('font-size', 11).style('fill', 'var(--color-fg)').text(d3.format(',.0f')(v));
+      svg.append('text').attr('x', cx).attr('y', h - 8).attr('text-anchor', 'middle').attr('font-size', 11).style('fill', 'var(--color-fg-muted)').text(d.quarter);
+      svg.append('rect').attr('x', x(d.quarter)).attr('y', m.t).attr('width', x.bandwidth()).attr('height', h - m.t - m.b).style('fill', 'transparent')
+        .on('mousemove', (e) => tip.show(e, d.quarter, [d.revenue == null ? '尚未公布' : `實際 $${d3.format(',.2f')(d.revenue)}M`, `預估 $${d3.format(',.2f')(d.estimate)}M`, d.eps == null ? '' : `EPS ${d.eps}`].filter(Boolean)))
+        .on('mouseleave', () => tip.hide());
+    });
+  });
+
+  // Tables
+  const body = (name, id, cols) => dash.draw(name, (tb) => {
+    tb.replaceChildren();
+    rows(id).forEach((r) => {
+      const tr = document.createElement('tr');
+      cols.forEach(([f, fmt, cls]) => {
+        const td = document.createElement('td');
+        td.textContent = fmt ? fmt(r[f], r) : r[f];
+        if (cls) td.className = typeof cls === 'function' ? cls(r[f]) : cls;
+        tr.append(td);
+      });
+      tb.append(tr);
+    });
+  });
+  const toneCls = (t) => (t === '多' ? 'ok nw' : t === '空' ? 'bad nw' : 'nw');
+  body('scen-body', 'scenarios', [['scenario', null, (s) => (s === '多頭' ? 'ok nw' : s === '空頭' ? 'bad nw' : 'nw')], ['prob', (v) => pct1(+v), 'num'], ['low', (v) => usd(+v), 'num'], ['high', (v) => usd(+v), 'num'], ['trigger', null, 'hide-n']]);
+  body('an-body', 'analysts', [['firm', null, 'nw'], ['rating', null, 'nw'], ['target', (v) => usd(+v), 'num'], ['date', null, 'num']]);
+  body('fac-body', 'factors', [['factor', null, 'nw'], ['score', (v) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v), (v) => 'num ' + (v > 0 ? 'ok' : v < 0 ? 'bad' : '')], ['note']]);
+  body('news-body', 'news', [['date', null, 'nw'], ['tone', null, toneCls], ['headline']]);
+})();
+</script>

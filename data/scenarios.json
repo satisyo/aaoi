@@ -1,0 +1,1 @@
+[{"scenario": "多頭", "prob": 0.3, "low": 83, "high": 92, "trigger": "營收≥$280M、Q4 指引≥$330M、1.6T 出貨確認、無新增 ATM"}, {"scenario": "中性", "prob": 0.45, "low": 60, "high": 80, "trigger": "營收落在 $255–290M 指引內、Q4 指引符合預期、仍有稀釋疑慮"}, {"scenario": "空頭", "prob": 0.25, "low": 50, "high": 58, "trigger": "營收或毛利率低於指引、DSP/TIA 缺料延遲、宣布第四輪增發"}]
